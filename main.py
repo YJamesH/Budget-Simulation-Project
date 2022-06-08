@@ -13,6 +13,7 @@ from random import randrange
 # fleetSize = int(input("Total Fleet Size: "))          # Total Fleet Size 
 # annualMiles = int(input("Annual mileage with gas: ")) # Annual miles driven
 # weightedMPG = float(input("MPG with gas: "))          # Average mpg
+# fuelPrice = float(input("Fuel price $/gal: "))        # $/gallon fuel average
 # MRCost = int(input("Maintenance & Repair Year 1 Base Cost: ")) # M&R base cost
  
 # # Diesel Info Inputs
@@ -38,6 +39,7 @@ annualBudget = 60000000                               # Total Annual Budget ~60m
 fleetSize = 200                                       # Total Fleet Size 
 annualMiles = 9000                                    # Annual miles driven
 weightedMPG = 6                                       # Average mpg
+fuelPrice = 2.5                                       # $/gallon fuel
 MRCost = 6000                                         # M&R base cost
 # Diesel Info Inputs
 dieselPrice = 120000                                  # Price of 1 Diesel Bus ~120k
@@ -66,7 +68,6 @@ annualDieselBase = dieselPrice/dieselTerm
 for i in range(dieselTerm):
     purchaseTCO.append(int(annualDieselBase*(pow(1+dieselRate,i))))
 
-print(purchaseTCO)
 
 # Maintenance and Repair
 for i in range(contractTerm):
@@ -76,12 +77,20 @@ for i in range(contractTerm):
     else:
         mrTCO.append(int(mrTCO[i-1]*(1+MREsc2)))
 
-print(mrTCO)
 
 # Fuel
+for i in range(contractTerm):
+    fuelTCO.append(int((annualMiles/weightedMPG)*fuelPrice*pow((1+costEsc),i)))
+
 
 # Overhead
+for i in range(contractTerm):
+    overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
+print(purchaseTCO)
+print(mrTCO)
+print(fuelTCO)
+print(overheadTCO)
 
 
 
