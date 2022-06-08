@@ -50,13 +50,21 @@ overheadAllocation = .15                         # Overhead Cost Allocation 15%
 costEsc = .02                                    # Other costs escalator (M&R, fuel, overhead,...)
 MREsc1 = .06                                     # M&R escalator in first half-life
 MREsc2 = .08                                     # M&R escalator in second half-life
+
+annualDeployed = [10,20,30,40,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67] # subject to change
+annualContract = [22000,22000,22000,22000,27000,27000,27000,27000,20000,20000,20000,20000,24000,24000,24000,24000,24000,24000,24000,24000]
 # ------------- end coded inputs for testing ------------- #
 
 
+# --------------------------------------------------- #
+# Example Highland Contract Illustration
 
-# -------------------------------------------------- #
 
+
+
+# --------------------------------------------------- #
 # Diesel Total Cost of Ownership (TCO)
+
 purchaseTCO = []
 mrTCO = []
 fuelTCO = []
@@ -64,9 +72,14 @@ overheadTCO = []
 
 # WIP @@@@@
 # Purchase price with financing
-annualDieselBase = dieselPrice/dieselTerm
+pmtDieselPrice = 0
+rateAccumulated = pow((1+dieselRate),dieselTerm)
+if dieselRate==0:
+    pmtDieselPrice = int(dieselPrice/dieselTerm)
+else:
+    pmtDieselPrice = int((dieselRate*dieselPrice*rateAccumulated) / (rateAccumulated-1))
 for i in range(dieselTerm):
-    purchaseTCO.append(int(annualDieselBase*(pow(1+dieselRate,i))))
+    purchaseTCO.append(pmtDieselPrice)
 
 
 # Maintenance and Repair
@@ -87,12 +100,56 @@ for i in range(contractTerm):
 for i in range(contractTerm):
     overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
-print(purchaseTCO)
-print(mrTCO)
-print(fuelTCO)
-print(overheadTCO)
+
+print("TCO", purchaseTCO)
+print("TCO", mrTCO)
+print("TCO", fuelTCO)
+print("TCO", overheadTCO)
+
+# --------------------------------------------------- #
+# Diesel Costs avoided  - Break down
+
+purchaseDCA = []
+mrDCA = []
+fuelDCA = []
+overheadDCA = []
+
+# Purchase costs avoided
 
 
+# M&R costs avoided
+
+
+# Fuel costs avoided
+
+
+# Overhead costs avoided
+
+
+# --------------------------------------------------- #
+# Carbon Reduction
+
+CO2DieselConstant = .01018      # Equivalent CO2 emissions per gal of diesel (metric tons)
+CO2GasConstant = .008887        # Equivalent CO2 emissions per gal of gas (metric tons)
+
+totalDeployed = []
+totalGalAvoided = []
+annualCarbonReduced = []
+cumulCarbonReduced = []
+
+totalDeployed.append(annualDeployed[0])
+for i in range(1,20):
+    totalDeployed.append(totalDeployed[i-1]+annualDeployed[i])
+for i in range(20):
+    totalGalAvoided.append((totalDeployed[i]*annualMiles)/weightedMPG)
+for i in range(20):
+    annualCarbonReduced.append(CO2DieselConstant*totalGalAvoided[i])
+cumulCarbonReduced.append(annualCarbonReduced[0])
+for i in range(1,20):
+    cumulCarbonReduced.append(annualCarbonReduced[i]+cumulCarbonReduced[i-1])
+
+print(cumulCarbonReduced) # MAKE PRINT 1 DECIMAL PLACE
+# --------------------------------------------------- #
 
 
 # Statistics summary
