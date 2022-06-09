@@ -1,9 +1,12 @@
 from random import randrange
+import matplotlib.pyplot as plt
+import numpy as np
 
-
-
+# --------------------------------------------------- #
 # # INPUTS 
+
 # # Contract Inputs
+# deploymentYear = int(input("Deployment Year: "))
 # contractTerm = int(input("Contract Term (years): ")) # Contract Term/Life of Bus
 # contractEsc = .03                                    # 3%/year
 # contractPrice = 30000                                # 30k bus/year
@@ -27,10 +30,11 @@ from random import randrange
 # MREsc1 = .06                                     # M&R escalator in first half-life
 # MREsc2 = .08                                     # M&R escalator in second half-life
 
+# --------------------------------------------------- #
+# Coded Inputs for Testing 
 
-
-# --------------- coded inputs for testing --------------- #
 # Contract Inputs
+deploymentYear = 2023
 contractTerm = 15                                    # Contract Term/Life of Bus
 contractEsc = .03                                    # 3%/year
 contractPrice = 30000                                # 30k bus/year
@@ -51,16 +55,14 @@ costEsc = .02                                    # Other costs escalator (M&R, f
 MREsc1 = .06                                     # M&R escalator in first half-life
 MREsc2 = .08                                     # M&R escalator in second half-life
 
-annualDeployed = [10,20,30,40,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67] # subject to change
-annualContract = [22000,22000,22000,22000,27000,27000,27000,27000,20000,20000,20000,20000,24000,24000,24000,24000,24000,24000,24000,24000]
-# ------------- end coded inputs for testing ------------- #
+# --------------------------------------------------- #
 
 
 # --------------------------------------------------- #
 # Example Highland Contract Illustration
 
-
-
+annualDeployed = [10,20,30,40,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67] # subject to change
+annualContract = [22000,22000,22000,22000,27000,27000,27000,27000,20000,20000,20000,20000,24000,24000,24000,24000,24000,24000,24000,24000]
 
 # --------------------------------------------------- #
 # Diesel Total Cost of Ownership (TCO)
@@ -132,10 +134,10 @@ overheadDCA = []
 CO2DieselConstant = .01018      # Equivalent CO2 emissions per gal of diesel (metric tons)
 CO2GasConstant = .008887        # Equivalent CO2 emissions per gal of gas (metric tons)
 
-totalDeployed = []
-totalGalAvoided = []
-annualCarbonReduced = []
-cumulCarbonReduced = []
+totalDeployed = []              # Cumulative count of EV's deployed
+totalGalAvoided = []            # Total gallons avoided given # of EV's deployed
+annualCarbonReduced = []        # Carbon reduced per specific year
+cumulCarbonReduced = []         # Cumulative Carbon reduced since deployment year
 
 totalDeployed.append(annualDeployed[0])
 for i in range(1,20):
@@ -144,11 +146,31 @@ for i in range(20):
     totalGalAvoided.append((totalDeployed[i]*annualMiles)/weightedMPG)
 for i in range(20):
     annualCarbonReduced.append(CO2DieselConstant*totalGalAvoided[i])
-cumulCarbonReduced.append(annualCarbonReduced[0])
+cumulCarbonReduced.append(round(annualCarbonReduced[0],1))
 for i in range(1,20):
-    cumulCarbonReduced.append(annualCarbonReduced[i]+cumulCarbonReduced[i-1])
+    cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
-print(cumulCarbonReduced) # MAKE PRINT 1 DECIMAL PLACE
+print(cumulCarbonReduced) 
+
+# Table Creation
+
+
+# Graph Creation 
+yearsADep = []
+for years in range(deploymentYear, deploymentYear+20):
+    yearsADep.append(years)
+
+plt.plot(yearsADep, cumulCarbonReduced, '-b', label='Cumulative Carbon Reduced')
+plt.xticks(yearsADep)
+yStep = 25000
+CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
+plt.yticks(np.arange(0, CCRyMax, yStep))
+plt.ylabel('metric tons')
+plt.xlabel('Year')
+plt.legend(loc='upper left')
+plt.title('Cumulative Metric Tons of CO2 Reduced since Deployment Year')
+plt.show()
+
 # --------------------------------------------------- #
 
 
@@ -161,5 +183,4 @@ print("Gas Bus MPG is ", weightedMPG)
 print("Diesel Bus Purchase Price is ", dieselPrice)
 print("Diesel Bus Financing Rate is ", dieselRate)
 print("Diesel Bus Financing Term is ", dieselTerm)
-
 
