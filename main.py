@@ -56,13 +56,19 @@ MREsc1 = .06                                     # M&R escalator in first half-l
 MREsc2 = .08                                     # M&R escalator in second half-life
 
 # --------------------------------------------------- #
-
-
-# --------------------------------------------------- #
-# Example Highland Contract Illustration
-
-annualDeployed = [10,20,30,40,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67] # subject to change
-annualContract = [22000,22000,22000,22000,27000,27000,27000,27000,20000,20000,20000,20000,24000,24000,24000,24000,24000,24000,24000,24000]
+# Example Highland Contract Illustration  
+#
+#   ***subject to change***
+annualDeployed = [10,20,30,40,
+                  67,67,67,67,
+                  67,67,67,67,
+                  67,67,67,67,
+                  67,67,67,67] 
+annualContract = [22000,22000,22000,22000,
+                  27000,27000,27000,27000,
+                  20000,20000,20000,20000,
+                  24000,24000,24000,24000,
+                  24000,24000,24000,24000]
 
 # --------------------------------------------------- #
 # Diesel Total Cost of Ownership (TCO)
@@ -72,7 +78,6 @@ mrTCO = []
 fuelTCO = []
 overheadTCO = []
 
-# WIP @@@@@
 # Purchase price with financing
 pmtDieselPrice = 0
 rateAccumulated = pow((1+dieselRate),dieselTerm)
@@ -102,7 +107,7 @@ for i in range(contractTerm):
 for i in range(contractTerm):
     overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
-
+# Prints
 print("TCO", purchaseTCO)
 print("TCO", mrTCO)
 print("TCO", fuelTCO)
@@ -150,9 +155,7 @@ cumulCarbonReduced.append(round(annualCarbonReduced[0],1))
 for i in range(1,20):
     cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
-print(cumulCarbonReduced) 
-
-# Table Creation
+print("CCR", cumulCarbonReduced) 
 
 
 # Graph Creation 
@@ -160,7 +163,7 @@ yearsADep = []
 for years in range(deploymentYear, deploymentYear+20):
     yearsADep.append(years)
 
-plt.plot(yearsADep, cumulCarbonReduced, '-b', label='Cumulative Carbon Reduced')
+plt.plot(yearsADep, cumulCarbonReduced, '-b', label='Carbon Reduced')
 plt.xticks(yearsADep)
 yStep = 25000
 CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
@@ -169,13 +172,14 @@ plt.ylabel('metric tons')
 plt.xlabel('Year')
 plt.legend(loc='upper left')
 plt.title('Cumulative Metric Tons of CO2 Reduced since Deployment Year')
+# plt.grid()
 plt.show()
 
 # --------------------------------------------------- #
 
 
 # Statistics summary
-print("\n Summary Statistics")
+print("\n Summary ")
 print("Annual Budget is ", annualBudget)
 print("Total Fleet Size is ", fleetSize)
 print("Annual mileage with gas is ", annualMiles)
