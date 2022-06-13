@@ -88,6 +88,21 @@ if __name__ == '__main__':
                     24000,24000,24000,24000]
 
     # --------------------------------------------------- #
+    # Example Highland Contract Total Budget
+    
+    contractYearPrice = [0]*20
+
+    for simDepYear in range(20):
+        contractPrice = annualDeployed[simDepYear] * annualContract[simDepYear]
+        for simAddYear in range(simDepYear, simDepYear+contractTerm):
+            if simAddYear == 20:
+                break
+            contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + contractPrice)
+            contractPrice = contractPrice * (1+contractEsc)
+
+    print("Contract", contractYearPrice)
+
+    # --------------------------------------------------- #
     # Diesel Total Cost of Ownership (TCO)
 
     purchaseTCO = []
@@ -176,8 +191,11 @@ if __name__ == '__main__':
 
     # --------------------------------------------------- #
     # relative budget neutral?
+    totalDCA = []
+    for i in range(20):
+        totalDCA.append(purchaseDCA[i] + mrDCA[i] + fuelDCA[i] + overheadDCA[i])
 
-
+    print(totalDCA)
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
