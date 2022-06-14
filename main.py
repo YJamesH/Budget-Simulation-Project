@@ -56,7 +56,7 @@ if __name__ == '__main__':
     contractEsc = .03                                    # 3%/year
     contractPrice = 30000                                # 30k bus/year
     # User Info Inputs
-    annualBudget = 60000000                               # Total Annual Budget ~60m
+    annualBudget = 59893990                               # Total Annual Budget ~60m
     fleetSize = 200                                       # Total Fleet Size 
     annualMiles = 9000                                    # Annual miles driven
     weightedMPG = 6                                       # Average mpg
@@ -190,12 +190,26 @@ if __name__ == '__main__':
     print("DCA", overheadDCA)
 
     # --------------------------------------------------- #
-    # relative budget neutral?
+    # Relative Budget Neutrality
     totalDCA = []
     for i in range(20):
         totalDCA.append(purchaseDCA[i] + mrDCA[i] + fuelDCA[i] + overheadDCA[i])
 
-    print(totalDCA)
+    ### Budget Difference ###
+    budgetDiffRBN = []
+    for i in range(20):
+        budgetDiffRBN.append(totalDCA[i]-contractYearPrice[i])
+
+    ### Total Budget With Highland ###
+    budgetStaQuo = []
+    for simDepYear in range(20):
+        budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
+
+    # Prints
+    print("Total DCA", totalDCA)
+    print("Budget Diff", budgetDiffRBN)
+
+    print("budget Status Quo", budgetStaQuo)
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
