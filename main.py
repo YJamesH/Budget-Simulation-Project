@@ -52,20 +52,24 @@ if __name__ == '__main__':
 
     # Contract Inputs
     deploymentYear = 2023
-    contractTerm = 15                                    # Contract Term/Life of Bus
-    contractEsc = .03                                    # 3%/year
-    contractPrice = 30000                                # 30k bus/year
-    # User Info Inputs
-    annualBudget = 59893990                               # Total Annual Budget ~60m
-    fleetSize = 200                                       # Total Fleet Size 
-    annualMiles = 9000                                    # Annual miles driven
-    weightedMPG = 6                                       # Average mpg
-    fuelPriceGal = 2.5                                    # $/gallon fuel
-    MRCost = 6000                                         # M&R base cost
+    contractTerm = 15                                # Contract Term/Life of Bus
+    contractEsc = .03                                # 3%/year
+    contractPrice = 30000                            # 30k bus/year
+    # User Info Inputs  **CHANGE TO PERCENTAGES**
+    annualBudget = 59893990                          # Total Annual Budget ~60m
+    annualBudgetSal = 46255860                       # ~67% Annual Budget -> Salaries    
+    annualBudgetCap = 3000000                        # ~17% Annual Budget -> Capital Cost
+    annualBudgetOp = 10638130                        # ~17% Annual Budget -> Operating Costs
+
+    fleetSize = 800                                  # Total Fleet Size 
+    annualMiles = 9000                               # Annual miles driven
+    weightedMPG = 6                                  # Average mpg
+    fuelPriceGal = 2.5                               # $/gallon fuel
+    MRCost = 6000                                    # M&R base cost
     # Diesel Info Inputs
-    dieselPrice = 120000                                  # Price of 1 Diesel Bus ~120k
-    dieselRate = .03                                      # _%/year ~2%/year
-    dieselTerm = 3                                        # Years to Finance Bus
+    dieselPrice = 120000                             # Price of 1 Diesel Bus ~120k
+    dieselRate = .03                                 # _%/year ~2%/year
+    dieselTerm = 3                                   # Years to Finance Bus
     dieselPriceEsc = .05                             # Diesel Price escalator 5%
     overheadAllocation = .15                         # Overhead Cost Allocation 15%
     costEsc = .02                                    # Other costs escalator (M&R, fuel, overhead,...)
@@ -206,7 +210,7 @@ if __name__ == '__main__':
     for simDepYear in range(20):
         budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
     for simDepYear in range(20):
-        finalRBudget.append(budgetStaQuo-budgetDiffRBN)
+        finalRBudget.append(budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear])
     
     # maybe make one for individual
     #   budget w/ highland     \
@@ -221,8 +225,30 @@ if __name__ == '__main__':
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
+    evCostReduction = []
+    evCostReduction.append(annualDeployed[0]/fleetSize)
+    for simDepYear in range(1,20):
+        evCostReduction.append(round(evCostReduction[simDepYear-1] + annualDeployed[simDepYear]/fleetSize,3))
+    
+    ## Starts one year before deploy (i.e. 2022) ##
+    buOperatingSQ = []
+    for simDepYear in range(0,21):      
+        buOperatingSQ.append(int(annualBudgetOp * pow(1+costEsc, simDepYear))) 
+   
+    buOperatingCosts = []
+    buOperatingCosts.append(buOperatingSQ[0])
+    for i in range(20):   
+        buOperatingCosts.append(buOperatingSQ[i] * (1-evCostReduction[i]))
 
+    buPersonnelCosts = []
+    for i in range(21):   
+        buPersonnelCosts.append(annualBudgetSal * pow(1+costEsc, i))
 
+    buTotalPrice = []
+    for simDepYear in range(21):
+        buTotalPrice(buOperatingCosts[i] + buPersonnelCosts[i] + buOperatingSQ[i])
+
+    
 
     # --------------------------------------------------- #
     # Carbon Reduction
