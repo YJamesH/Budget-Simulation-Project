@@ -202,8 +202,16 @@ if __name__ == '__main__':
 
     ### Total Budget With Highland ###
     budgetStaQuo = []
+    finalRBudget = []
     for simDepYear in range(20):
         budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
+    for simDepYear in range(20):
+        finalRBudget.append(budgetStaQuo-budgetDiffRBN)
+    
+    # maybe make one for individual
+    #   budget w/ highland     \
+    #   budget w/o highland   --- compare
+
 
     # Prints
     print("Total DCA", totalDCA)
