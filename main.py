@@ -297,15 +297,22 @@ if __name__ == '__main__':
     # --------------------------------------------------- #
     # Graphs and Plots
     
-
-
-
-    # Carbon Reduction Line Graph 
+    fig, axes = plt.subplots(nrows = 2, ncols = 2)
     yearsADep = []
     for years in range(deploymentYear, deploymentYear+20):
         yearsADep.append(years)
 
-    plt.plot(yearsADep, cumulCarbonReduced, '-b', label='Carbon Reduced')
+    # Figure 1
+    axes[0, 0].plot(yearsADep, cumulCarbonReduced)
+    axes[0, 0].set_title('Axis [0, 0]')
+
+    # Figure 2
+    axes[0, 1].plot(yearsADep, cumulCarbonReduced)
+    axes[0, 1].set_title('Axis [0, 1]')
+
+    # Figure 3 - Carbon Reduction Line Graph 
+    axes[1, 0].plot(yearsADep, cumulCarbonReduced, '-b', label='Carbon Reduced')
+    plt.sca(axes[1,0])
     plt.xticks(yearsADep)
     yStep = 25000
     CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
@@ -313,9 +320,16 @@ if __name__ == '__main__':
     plt.ylabel('metric tons')
     plt.xlabel('Year')
     plt.legend(loc='upper left')
-    plt.title('Cumulative Metric Tons of CO2 Reduced since Deployment Year')
-    # plt.grid()
-    # plt.show()
+    plt.title('Cumulative CO2 (M.Ton) Reduced')
+
+    # Figure 4
+    # axes[1, 1].plot(yearsADep, cumulCarbonReduced)
+    # axes[1, 1].set_title('Axis [1, 1]')
+
+
+    
+    fig.tight_layout()
+    plt.show()
 
     # --------------------------------------------------- #
 
