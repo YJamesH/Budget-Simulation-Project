@@ -104,7 +104,7 @@ if __name__ == '__main__':
             contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + contractPrice)
             contractPrice = contractPrice * (1+contractEsc)
 
-    print("Contract", contractYearPrice)
+    print("Contract", contractYearPrice, "\n")
 
     # --------------------------------------------------- #
     # Diesel Total Cost of Ownership (TCO)
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     print("TCO", purchaseTCO)
     print("TCO", mrTCO)
     print("TCO", fuelTCO)
-    print("TCO", overheadTCO)
+    print("TCO", overheadTCO, "\n")
 
     # --------------------------------------------------- #
     # Diesel Costs avoided  - Break down
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     print("DCA", purchaseDCA)
     print("DCA", mrDCA)
     print("DCA", fuelDCA)
-    print("DCA", overheadDCA)
+    print("DCA", overheadDCA, "\n")
 
     # --------------------------------------------------- #
     # Relative Budget Neutrality
@@ -221,7 +221,8 @@ if __name__ == '__main__':
     print("Total DCA", totalDCA)
     print("Budget Diff", budgetDiffRBN)
 
-    print("budget Status Quo", budgetStaQuo)
+    print("Budget Status Quo", budgetStaQuo)
+    print("Relative Budget", finalRBudget, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -241,18 +242,33 @@ if __name__ == '__main__':
     buOperatingCosts = []
     buOperatingCosts.append(buOperatingSQ[0])
     for simDepYear in range(20):   
-        buOperatingCosts.append(int(buOperatingSQ[simDepYear] * (1-evCostReduction[simDepYear])))
+        tempOpCost = int(buOperatingSQ[simDepYear] * (1-evCostReduction[simDepYear]))
+        if tempOpCost < 0:
+            tempOpCost = 0
+        buOperatingCosts.append(tempOpCost)
 
     buPersonnelCosts = []
     for simDepYear in range(21):   
         buPersonnelCosts.append(int(annualBudgetSal * pow(1+costEsc, simDepYear)))
 
+    # total minus diesel buses
     buTotalPrice = []
     for i in range(21):
         buTotalPrice.append(int(buOperatingCosts[i] + buPersonnelCosts[i]))
+    # total with highland contract
     buTotalPrice[0] = buTotalPrice[0]+annualBudgetCap
+    for simDepYear in range(1,21):
+        buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
-    print("butotal", buTotalPrice)
+
+    print("bu opsq", buOperatingSQ)
+    print("bu opco", buOperatingCosts)
+    print("bu pers", buPersonnelCosts)
+
+    print("butotal", buTotalPrice, "\n")
+
+
+    
 
     # --------------------------------------------------- #
     # Carbon Reduction
@@ -276,10 +292,15 @@ if __name__ == '__main__':
     for i in range(1,20):
         cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
-    print("CCR", cumulCarbonReduced) 
+    print("CCR", cumulCarbonReduced, "\n") 
+
+    # --------------------------------------------------- #
+    # Graphs and Plots
+    
 
 
-    # Graph Creation 
+
+    # Carbon Reduction Line Graph 
     yearsADep = []
     for years in range(deploymentYear, deploymentYear+20):
         yearsADep.append(years)
