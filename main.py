@@ -228,6 +228,9 @@ if __name__ == '__main__':
     evCostReduction = []
     evCostReduction.append(annualDeployed[0]/fleetSize)
     for simDepYear in range(1,20):
+        tempPerc = round(evCostReduction[simDepYear-1] + annualDeployed[simDepYear]/fleetSize,3)
+        if tempPerc > 100:
+            tempPerc = 100
         evCostReduction.append(round(evCostReduction[simDepYear-1] + annualDeployed[simDepYear]/fleetSize,3))
     
     ## Starts one year before deploy (i.e. 2022) ##
@@ -237,18 +240,19 @@ if __name__ == '__main__':
    
     buOperatingCosts = []
     buOperatingCosts.append(buOperatingSQ[0])
-    for i in range(20):   
-        buOperatingCosts.append(buOperatingSQ[i] * (1-evCostReduction[i]))
+    for simDepYear in range(20):   
+        buOperatingCosts.append(int(buOperatingSQ[simDepYear] * (1-evCostReduction[simDepYear])))
 
     buPersonnelCosts = []
-    for i in range(21):   
-        buPersonnelCosts.append(annualBudgetSal * pow(1+costEsc, i))
+    for simDepYear in range(21):   
+        buPersonnelCosts.append(int(annualBudgetSal * pow(1+costEsc, simDepYear)))
 
     buTotalPrice = []
-    for simDepYear in range(21):
-        buTotalPrice(buOperatingCosts[i] + buPersonnelCosts[i] + buOperatingSQ[i])
+    for i in range(21):
+        buTotalPrice.append(int(buOperatingCosts[i] + buPersonnelCosts[i]))
+    buTotalPrice[0] = buTotalPrice[0]+annualBudgetCap
 
-    
+    print("butotal", buTotalPrice)
 
     # --------------------------------------------------- #
     # Carbon Reduction
