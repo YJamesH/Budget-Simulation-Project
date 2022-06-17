@@ -1,6 +1,7 @@
 from random import randrange
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import FuncFormatter
 
 # --------------------------------------------------- #
 # FUNCTIONS
@@ -14,6 +15,15 @@ def pmtCalc(rate, term, price):
     else:
         result = int((rate*price*rateAcc) / (rateAcc-1))
     return result
+
+# Millions simplifier for graphing
+def millions(x, pos):
+    # x = value and pos = tick position
+    return '$%1.1f' % (x * 1e-6)
+
+# Thousands simplifier for graphing
+def thousands(x, pos):
+    return '%1.1f' % (x * 1e-3)
 
 # --------------------------------------------------- #
 
@@ -301,19 +311,62 @@ if __name__ == '__main__':
     yearsADep = []
     for years in range(deploymentYear, deploymentYear+20):
         yearsADep.append(years)
+    yearsWDep = yearsADep.copy()
+    yearsWDep.insert(0, deploymentYear-1)
+    yearsShown = []
+    for years in range(0,21,4):
+        yearsShown.append(yearsWDep[years])
 
-    # Figure 1
-    axes[0, 0].plot(yearsADep, cumulCarbonReduced)
-    axes[0, 0].set_title('Axis [0, 0]')
+    # formatting
+    formatMillions = FuncFormatter(millions)
 
-    # Figure 2
-    axes[0, 1].plot(yearsADep, cumulCarbonReduced)
-    axes[0, 1].set_title('Axis [0, 1]')
+    # Figure 1 - Budget Neutral Transition
+    plt.sca(axes[0,0])
+    plt.plot([], [], 'b', linewidth=5)     # Houston ISD Budget
+    plt.plot([], [], 'r', linewidth=5)     # Budget with Highland
+    plt.stackplot(yearsADep, finalRBudget, budgetDiffRBN, colors=['b','r'])
+
+    plt.ticklabel_format(style = 'plain')
+    axes[0,0].yaxis.set_major_formatter(formatMillions)
+    plt.xticks(yearsShown)
+    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.ylabel('Millions')
+    plt.xlabel('Year')
+    plt.legend(["Budget with Highland", "Budget saved"], loc='lower right')
+    plt.title('Budget Neutral Transition')
+
+    # Bottom Up Budget Analysis
+    plt.sca(axes[0,1])
+    plt.plot(yearsADep, budgetStaQuo, 'r', label='Budget SQ')
+    plt.bar(yearsWDep, buOperatingCosts, color='m',)
+    plt.bar(yearsWDep, buPersonnelCosts, bottom=buOperatingCosts, color='b')
+    # Since operating costs and personnel costs are not arrays, need to combine lists
+    CYPFormat = contractYearPrice.copy()
+    CYPFormat.insert(0,0)
+    OpPerSum = []
+    for i in range(21):
+        OpPerSum.append(buOperatingCosts[i]+buPersonnelCosts[i])
+    plt.bar(yearsWDep, CYPFormat, bottom=OpPerSum, color='c')
+
+    plt.ticklabel_format(style = 'plain')
+    axes[0,1].yaxis.set_major_formatter(formatMillions)
+    plt.xticks(yearsShown)
+    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.ylabel('Millions')
+    plt.xlabel('Year')
+    plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
+
+    # plt.legend(loc='upper left')
+    plt.title('Bottom Up Analysis')
 
     # Figure 3 - Carbon Reduction Line Graph 
-    axes[1, 0].plot(yearsADep, cumulCarbonReduced, '-b', label='Carbon Reduced')
     plt.sca(axes[1,0])
-    plt.xticks(yearsADep)
+    plt.plot(yearsADep, cumulCarbonReduced, 'c', label='Expected Carbon Reduction')
+    
+    plt.ticklabel_format(style = 'plain')
+    formatThousands = FuncFormatter(thousands)
+    axes[0,1].yaxis.set_major_formatter(formatThousands)
+    plt.xticks(yearsShown)
     yStep = 25000
     CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
     plt.yticks(np.arange(0, CCRyMax, yStep))
@@ -323,8 +376,8 @@ if __name__ == '__main__':
     plt.title('Cumulative CO2 (M.Ton) Reduced')
 
     # Figure 4
-    # axes[1, 1].plot(yearsADep, cumulCarbonReduced)
-    # axes[1, 1].set_title('Axis [1, 1]')
+    axes[1, 1].plot(yearsADep, cumulCarbonReduced)
+    axes[1, 1].set_title('Axis [1, 1]')
 
 
     
