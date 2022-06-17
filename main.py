@@ -319,6 +319,7 @@ if __name__ == '__main__':
 
     # formatting
     formatMillions = FuncFormatter(millions)
+    formatThousands = FuncFormatter(thousands)
 
     # Figure 1 - Budget Neutral Transition
     plt.sca(axes[0,0])
@@ -364,13 +365,12 @@ if __name__ == '__main__':
     plt.plot(yearsADep, cumulCarbonReduced, 'c', label='Expected Carbon Reduction')
     
     plt.ticklabel_format(style = 'plain')
-    formatThousands = FuncFormatter(thousands)
-    axes[0,1].yaxis.set_major_formatter(formatThousands)
+    axes[1,0].yaxis.set_major_formatter(formatThousands)
     plt.xticks(yearsShown)
     yStep = 25000
     CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
     plt.yticks(np.arange(0, CCRyMax, yStep))
-    plt.ylabel('metric tons')
+    plt.ylabel('Metric Tons')
     plt.xlabel('Year')
     plt.legend(loc='upper left')
     plt.title('Cumulative CO2 (M.Ton) Reduced')
