@@ -271,11 +271,11 @@ if __name__ == '__main__':
         buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
 
-    print("bu opsq", buOperatingSQ)
-    print("bu opco", buOperatingCosts)
-    print("bu pers", buPersonnelCosts)
+    print("Bottom-up Operating Status Quo", buOperatingSQ)
+    print("Bottom-up Operating Costs", buOperatingCosts)
+    print("Bottom-up Personnel Costs", buPersonnelCosts)
 
-    print("butotal", buTotalPrice, "\n")
+    print("Bottom-up Total", buTotalPrice, "\n")
 
 
     
@@ -302,7 +302,7 @@ if __name__ == '__main__':
     for i in range(1,20):
         cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
-    print("CCR", cumulCarbonReduced, "\n") 
+    print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
 
     # --------------------------------------------------- #
     # Graphs and Plots
@@ -323,9 +323,10 @@ if __name__ == '__main__':
 
     # Figure 1 - Budget Neutral Transition
     plt.sca(axes[0,0])
+    plt.plot(yearsADep, budgetStaQuo, 'r', label='Budget SQ')
     plt.plot([], [], 'b', linewidth=5)     # Houston ISD Budget
-    plt.plot([], [], 'r', linewidth=5)     # Budget with Highland
-    plt.stackplot(yearsADep, finalRBudget, budgetDiffRBN, colors=['b','r'])
+    plt.plot([], [], 'y', linewidth=5)     # Budget with Highland
+    plt.stackplot(yearsADep, finalRBudget, budgetDiffRBN, colors=['b','y'])
 
     plt.ticklabel_format(style = 'plain')
     axes[0,0].yaxis.set_major_formatter(formatMillions)
@@ -333,12 +334,14 @@ if __name__ == '__main__':
     plt.yticks(np.arange(0, 100000000, 10000000))
     plt.ylabel('Millions')
     plt.xlabel('Year')
-    plt.legend(["Budget with Highland", "Budget saved"], loc='lower right')
+    plt.legend(["Budget Status Quo", "Budget with Highland", "Budget saved"], loc='lower right')
     plt.title('Budget Neutral Transition')
 
     # Figure 2 - Bottom Up Budget Analysis
     plt.sca(axes[0,1])
-    plt.plot(yearsADep, budgetStaQuo, 'r', label='Budget SQ')
+    budgetStaQuo1 = budgetStaQuo.copy()
+    budgetStaQuo1.append(int(annualBudget*pow(1+costEsc, 20)))
+    plt.plot(yearsWDep, budgetStaQuo1, 'r', label='Budget SQ') ##############################
     plt.bar(yearsWDep, buOperatingCosts, color='m',)
     plt.bar(yearsWDep, buPersonnelCosts, bottom=buOperatingCosts, color='b')
     # Since operating costs and personnel costs are not arrays, need to combine lists
@@ -348,14 +351,15 @@ if __name__ == '__main__':
     for i in range(21):
         OpPerSum.append(buOperatingCosts[i]+buPersonnelCosts[i])
     plt.bar(yearsWDep, CYPFormat, bottom=OpPerSum, color='c')
+    plt.bar(deploymentYear-1, annualBudgetCap, bottom=CYPFormat[0]+buOperatingCosts[0]+buPersonnelCosts[0], color='k')
 
     plt.ticklabel_format(style = 'plain')
     axes[0,1].yaxis.set_major_formatter(formatMillions)
     plt.xticks(yearsShown)
-    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.yticks(np.arange(0, 110000000, 10000000))
     plt.ylabel('Millions')
     plt.xlabel('Year')
-    plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
+    plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract", "Budget Capital Cost"], bbox_to_anchor=(1, 1))
     plt.title('Bottom Up Analysis')
 
     # Figure 3 - Carbon Reduction Line Graph 
@@ -425,5 +429,5 @@ if __name__ == '__main__':
     print("Gas Bus MPG is ", weightedMPG)
     print("Diesel Bus Purchase Price is ", dieselPrice)
     print("Diesel Bus Financing Rate is ", dieselRate)
-    print("Diesel Bus Financing Term is ", dieselTerm)
+    print("Diesel Bus Financing Term is ", dieselTerm, "\n")
 
