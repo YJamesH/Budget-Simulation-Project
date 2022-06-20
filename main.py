@@ -336,7 +336,7 @@ if __name__ == '__main__':
     plt.legend(["Budget with Highland", "Budget saved"], loc='lower right')
     plt.title('Budget Neutral Transition')
 
-    # Bottom Up Budget Analysis
+    # Figure 2 - Bottom Up Budget Analysis
     plt.sca(axes[0,1])
     plt.plot(yearsADep, budgetStaQuo, 'r', label='Budget SQ')
     plt.bar(yearsWDep, buOperatingCosts, color='m',)
@@ -356,8 +356,6 @@ if __name__ == '__main__':
     plt.ylabel('Millions')
     plt.xlabel('Year')
     plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
-
-    # plt.legend(loc='upper left')
     plt.title('Bottom Up Analysis')
 
     # Figure 3 - Carbon Reduction Line Graph 
@@ -375,10 +373,42 @@ if __name__ == '__main__':
     plt.legend(loc='upper left')
     plt.title('Cumulative CO2 (M.Ton) Reduced')
 
-    # Figure 4
-    axes[1, 1].plot(yearsADep, cumulCarbonReduced)
-    axes[1, 1].set_title('Axis [1, 1]')
+    # Figure 4 - Short Term Bottom Up analysis
+    
 
+    fiveYearSim = [deploymentYear-1]
+    for i in range(6):
+        fiveYearSim.append(deploymentYear+i)
+    plt.sca(axes[1,1])
+
+    fiveBudgetStaQuo = []
+    fiveBuOperatingCosts = []
+    fiveBuPersonnelCosts = []
+    fiveCYPFormat = []
+    for i in range(7):
+        fiveBudgetStaQuo.append(budgetStaQuo[i])
+        fiveBuOperatingCosts.append(buOperatingCosts[i])
+        fiveBuPersonnelCosts.append(buPersonnelCosts[i])
+        fiveCYPFormat.append(CYPFormat[i])
+    # Insert data into bar graph
+    plt.plot(fiveYearSim, fiveBudgetStaQuo, 'r', label='Budget SQ')
+    plt.bar(fiveYearSim, fiveBuOperatingCosts, color='m',)
+    plt.bar(fiveYearSim, fiveBuPersonnelCosts, bottom=fiveBuOperatingCosts, color='b')
+
+    # Since operating costs and personnel costs are not arrays, need to combine lists
+    fiveOpPerSum = []
+    for i in range(7):
+        fiveOpPerSum.append(fiveBuOperatingCosts[i]+fiveBuPersonnelCosts[i])    
+    plt.bar(fiveYearSim, fiveCYPFormat, bottom=fiveOpPerSum, color='c')
+
+    plt.ticklabel_format(style = 'plain')
+    axes[1,1].yaxis.set_major_formatter(formatMillions)
+    plt.xticks(np.arange(deploymentYear-1, deploymentYear+6, 1))
+    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.ylabel('Millions')
+    plt.xlabel('Year')
+    plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
+    plt.title('Short Term Bottom Up Analysis')
 
     
     fig.tight_layout()
