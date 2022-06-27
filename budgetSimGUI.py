@@ -1,12 +1,20 @@
+# Plotting Library
+from csv import excel
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import FuncFormatter
 import numpy
 import numpy as np
+
+# GUI 
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import FuncFormatter
-
 matplotlib.use('TkAgg')
+
+# Read Excel
+from kiwisolver import Expression
+import pandas as pd
+
 
 def create_budget_graphs(inputs):
 
@@ -38,14 +46,13 @@ def create_budget_graphs(inputs):
 
     # Contract Inputs
     deploymentYear = inputs[0]
-    contractTerm = inputs[1]                                # Contract Term/Life of Bus
-    contractEsc = .03                                # 3%/year
-    contractPrice = 30000                            # 30k bus/year
+    contractTerm = inputs[1]                         # Contract Term/Life of Bus
+
     # User Info Inputs  **CHANGE TO PERCENTAGES**
     annualBudget = inputs[2]                         # Total Annual Budget ~60m
-    annualBudgetSal = inputs[3]*annualBudget                        # ~67% Annual Budget -> Salaries    
-    annualBudgetCap = inputs[4]*annualBudget                         # ~17% Annual Budget -> Capital Cost
-    annualBudgetOp = inputs[5]*annualBudget                         # ~17% Annual Budget -> Operating Costs
+    annualBudgetSal = inputs[3]*annualBudget         # ~67% Annual Budget -> Salaries    
+    annualBudgetCap = inputs[4]*annualBudget         # ~17% Annual Budget -> Capital Cost
+    annualBudgetOp = inputs[5]*annualBudget          # ~17% Annual Budget -> Operating Costs
 
     fleetSize = inputs[6]                            # Total Fleet Size 
     annualMiles = inputs[7]                          # Annual miles driven
@@ -56,26 +63,63 @@ def create_budget_graphs(inputs):
     dieselPrice = inputs[11]                          # Price of 1 Diesel Bus ~120k
     dieselRate = inputs[12]                           # _%/year ~2%/year
     dieselTerm = inputs[13]                          # Years to Finance Bus
-    dieselPriceEsc = .05                             # Diesel Price escalator 5%
-    overheadAllocation = .15                         # Overhead Cost Allocation 15%
-    costEsc = .02                                    # Other costs escalator (M&R, fuel, overhead,...)
-    MREsc1 = .06                                     # M&R escalator in first half-life
-    MREsc2 = .08                                     # M&R escalator in second half-life
+
 
     # --------------------------------------------------- #
-    # Example Highland Contract Illustration  
-    #
-    #   ***subject to change***
-    annualDeployed = [10,20,30,40,
-                    67,67,67,67,
-                    67,67,67,67,
-                    67,67,67,67,
-                    67,67,67,67] 
-    annualContract = [22000,22000,22000,22000,
-                    27000,27000,27000,27000,
-                    20000,20000,20000,20000,
-                    24000,24000,24000,24000,
-                    24000,24000,24000,24000]
+    # Admin Inputs   **Read from excel sheet "Budget Simulation - Admin.xlsx"
+    
+    # Read from excel sheet
+    excelVars = pd.read_excel('Budget Simulation - Admin.xlsx', usecols= "E", header=2, nrows=7)
+    excelContract = pd.read_excel('Budget Simulation - Admin.xlsx', usecols= "I,J", header=3, nrows=20)
+
+    # Admin Variables
+    contractPrice = excelVars.iat[0,0]          # 30k bus/year
+    contractEsc = excelVars.iat[1,0]            # 3%/year
+    dieselPriceEsc = excelVars.iat[2,0]         # Diesel Price escalator 5%
+    overheadAllocation = excelVars.iat[3,0]     # Overhead Cost Allocation 15%
+    costEsc = excelVars.iat[4,0]                # Other costs escalator (M&R, fuel, overhead,...)
+    MREsc1 = excelVars.iat[5,0]                 # M&R escalator in first half-life
+    MREsc2 = excelVars.iat[6,0]                 # M&R escalator in second half-life
+
+    # Highland Contract
+    annualDeployed = []
+    annualContract = []
+    for i in range(20):
+        annualDeployed.append(excelContract.iat[i,0]) 
+        annualContract.append(excelContract.iat[i,1])
+
+    # --------------------------------------------------- #
+
+    # Statistics summary
+    print("\n Summary ")
+    print("Deployment Year              ", deploymentYear)
+    print("Contract Term                ", deploymentYear)
+    print("Annual Budget                ", annualBudget)
+    print("Annual Budget Salary         ", annualBudgetSal)
+    print("Annual Budget Capital        ", annualBudgetCap)
+    print("Annual Budget Operating      ", annualBudgetOp)
+
+    print("Total Fleet Size is          ", fleetSize)
+    print("Annual mileage with gas is   ", annualMiles)
+    print("Gas Bus MPG is               ", weightedMPG)
+    print("Fuel Price per Gallon        ", fuelPriceGal)
+    print("Maintenance & Repair Cost    ", MRCost)
+
+    print("Diesel Bus Purchase Price is ", dieselPrice)
+    print("Diesel Bus Financing Rate is ", dieselRate)
+    print("Diesel Bus Financing Term is ", dieselTerm)
+
+    print("\n ")
+    print("Contract Bus Price/Year      ", contractPrice)
+    print("Contract Bus Escalator       ", contractEsc)
+    print("Diesel Bus Escalator         ", dieselPriceEsc)
+    print("Overhead Allocation Cost     ", overheadAllocation)
+    print("Other Costs Escaltor         ", costEsc)
+    print("M&R first half-life          ", MREsc1)
+    print("M&R second half-life         ", MREsc2)
+
+    print("Annual Deploy", annualDeployed)
+    print("Annual Contract Price", annualContract)
 
     # --------------------------------------------------- #
     # Example Highland Contract Total Budget
@@ -90,7 +134,7 @@ def create_budget_graphs(inputs):
             contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + contractPrice)
             contractPrice = contractPrice * (1+contractEsc)
 
-    print("Contract", contractYearPrice, "\n")
+    # print("Contract", contractYearPrice, "\n")
 
     # --------------------------------------------------- #
     # Diesel Total Cost of Ownership (TCO)
@@ -125,10 +169,10 @@ def create_budget_graphs(inputs):
         overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
     # Prints
-    print("TCO", purchaseTCO)
-    print("TCO", mrTCO)
-    print("TCO", fuelTCO)
-    print("TCO", overheadTCO, "\n")
+    # print("TCO", purchaseTCO)
+    # print("TCO", mrTCO)
+    # print("TCO", fuelTCO)
+    # print("TCO", overheadTCO, "\n")
 
     # --------------------------------------------------- #
     # Diesel Costs avoided  - Break down
@@ -174,10 +218,10 @@ def create_budget_graphs(inputs):
         overheadDCA.append(int(overheadAllocation*(fuelDCA[simDepYear] + mrDCA[simDepYear])))
 
     # Prints
-    print("DCA", purchaseDCA)
-    print("DCA", mrDCA)
-    print("DCA", fuelDCA)
-    print("DCA", overheadDCA, "\n")
+    # print("DCA", purchaseDCA)
+    # print("DCA", mrDCA)
+    # print("DCA", fuelDCA)
+    # print("DCA", overheadDCA, "\n")
 
     # --------------------------------------------------- #
     # Relative Budget Neutrality
@@ -204,11 +248,11 @@ def create_budget_graphs(inputs):
 
 
     # Prints
-    print("Total DCA", totalDCA)
-    print("Budget Diff", budgetDiffRBN)
+    # print("Total DCA", totalDCA)
+    # print("Budget Diff", budgetDiffRBN)
 
-    print("Budget Status Quo", budgetStaQuo)
-    print("Relative Budget", finalRBudget, "\n")
+    # print("Budget Status Quo", budgetStaQuo)
+    # print("Relative Budget", finalRBudget, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -247,11 +291,11 @@ def create_budget_graphs(inputs):
         buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
 
-    print("Bottom-up Operating Status Quo", buOperatingSQ)
-    print("Bottom-up Operating Costs", buOperatingCosts)
-    print("Bottom-up Personnel Costs", buPersonnelCosts)
+    # print("Bottom-up Operating Status Quo", buOperatingSQ)
+    # print("Bottom-up Operating Costs", buOperatingCosts)
+    # print("Bottom-up Personnel Costs", buPersonnelCosts)
 
-    print("Bottom-up Total", buTotalPrice, "\n")
+    # print("Bottom-up Total", buTotalPrice, "\n")
 
 
 
@@ -278,7 +322,7 @@ def create_budget_graphs(inputs):
     for i in range(1,20):
         cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
-    print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
+    # print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
 
     # --------------------------------------------------- #
     # Graphs and Plots
@@ -389,18 +433,6 @@ def create_budget_graphs(inputs):
     plt.title('Short Term Bottom Up Analysis')
 
     fig.tight_layout()
-
-    # --------------------------------------------------- #
-
-    # Statistics summary
-    print("\n Summary ")
-    print("Annual Budget is ", annualBudget)
-    print("Total Fleet Size is ", fleetSize)
-    print("Annual mileage with gas is ", annualMiles)
-    print("Gas Bus MPG is ", weightedMPG)
-    print("Diesel Bus Purchase Price is ", dieselPrice)
-    print("Diesel Bus Financing Rate is ", dieselRate)
-    print("Diesel Bus Financing Term is ", dieselTerm, "\n")
 
     return plt.gcf()
 
