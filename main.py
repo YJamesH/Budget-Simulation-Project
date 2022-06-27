@@ -30,7 +30,7 @@ def thousands(x, pos):
 if __name__ == '__main__':
 
     # --------------------------------------------------- #
-    # # INPUTS 
+    # INPUTS 
 
     # # Contract Inputs
     # deploymentYear = int(input("Deployment Year: "))
@@ -39,12 +39,15 @@ if __name__ == '__main__':
     # contractPrice = 30000                                # 30k bus/year
 
     # # User Info Inputs
-    # annualBudget = int(input("Annual budget: "))          # Total Annual Budget ~60m
-    # fleetSize = int(input("Total Fleet Size: "))          # Total Fleet Size 
-    # annualMiles = int(input("Annual mileage with gas: ")) # Annual miles driven
-    # weightedMPG = float(input("MPG with gas: "))          # Average mpg
-    # fuelPriceGal = float(input("Fuel price $/gal: "))        # $/gallon fuel average
-    # MRCost = int(input("Maintenance & Repair Year 1 Base Cost: ")) # M&R base cost
+    # annualBudget = int(input("Annual budget: "))              # Total Annual Budget ~60m
+    # annualBudgetSal = 46255860                                # ~67% Annual Budget -> Salaries    
+    # annualBudgetCap = 3000000                                 # ~17% Annual Budget -> Capital Cost
+    # annualBudgetOp = 10638130                                 # ~17% Annual Budget -> Operating Costs
+    # fleetSize = int(input("Total Fleet Size: "))              # Total Fleet Size 
+    # annualMiles = int(input("Annual mileage: "))              # Annual miles driven
+    # weightedMPG = float(input("MPG: "))                       # Average mpg
+    # fuelPriceGal = float(input("Fuel price $/gal: "))         # $/gallon fuel average
+    # MRCost = int(input("Maintenance & Repair Year 1 Cost: ")) # M&R base cost
     
     # # Diesel Info Inputs
     # dieselPrice = int(input("Diesel Bus Purchase Price: "))  # Price of 1 Diesel Bus ~120k
