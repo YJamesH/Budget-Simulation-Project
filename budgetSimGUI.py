@@ -494,12 +494,17 @@ if __name__ == '__main__':
     while (True):
         event, values = window.read()
 
-
         if event == sg.WINDOW_CLOSED:
             break
         if event=="Create Simulation Graphs":
             # User Error Checking
             
+            #
+            #
+            #
+            #
+            #
+
 
             # Get the user input information
             userInputs = []
