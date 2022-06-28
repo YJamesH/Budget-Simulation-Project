@@ -26,7 +26,10 @@ def create_budget_graphs(inputs):
         result = 0
         rateAcc = pow((1+rate),term)
         if rate==0:
-            result = int(price/term)
+            if term==0:
+                result = int(price)
+            else:
+                result = int(price/term)
         else:
             result = int((rate*price*rateAcc) / (rateAcc-1))
         return result
@@ -502,37 +505,165 @@ if __name__ == '__main__':
     while (True):
         event, values = window.read()
 
+        # Mouse over options
         # mouse = values['-COLUMN-ONE-']
         # if event == '-COLUMN-ONE-':
         #     if mouse == (None, None):
         #         continue
 
-
-        if event == "Event":
-            print(window.size)
+        # Resizable graph and inputs based on window size?
+        # if event == "Event":
+        #     print(window.size)
 
         if event == sg.WINDOW_CLOSED:
             break
         if event=="Create Simulation Graphs":
+            
             # User Error Checking
-            
-            
-            test = int(values['-DEPLOY-YEAR-'])
-            
-            
-            
-            
+            someError = False
 
-            # text = values['lp1']
-            # if text == '':
-            #     print('Null string')
-            # else:
-            #     try:
-            #         value = int(text)
-            #         print(f'Integer: {value}')
-            #     except:
-            #         print("Not Integer")
+            # Deployment Year - integer, 2021<X
+            text = values['-DEPLOY-YEAR-']
+            try:
+                num = int(text)
+                assert(num > 2021)
+                window['-DEPLOY-YEAR-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-DEPLOY-YEAR-'].update(background_color='red')
+                someError = True
 
+            # Contract Term - integer, 0<X<=20
+            text = values['-CONTRACT-TERM-']
+            try:
+                num = int(text)
+                assert(0 < num <= 20)
+                window['-CONTRACT-TERM-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-CONTRACT-TERM-'].update(background_color='red')
+                someError = True
+
+            # Annual Budget Total - integer, 0<X
+            text = values['-ANNUAL-BUDGET-']
+            try:
+                num = int(text)
+                assert(0 < num)
+                window['-ANNUAL-BUDGET-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-ANNUAL-BUDGET-'].update(background_color='red')
+                someError = True
+
+            # Budget Salary Cost Percentage - float, 0<=X<=1
+            text = values['-BUDGET-SALARY-']
+            try:
+                num = float(text)
+                assert(0 <= num <= 1)
+                window['-BUDGET-SALARY-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-BUDGET-SALARY-'].update(background_color='red')
+                someError = True
+
+            # Budget Capital Cost Percentage - float, 0<=X<=1
+            text = values['-BUDGET-CAPITAL-']
+            try:
+                num = float(text)
+                assert(0 <= num <= 1)
+                window['-BUDGET-CAPITAL-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-BUDGET-CAPITAL-'].update(background_color='red')
+                someError = True
+ 
+            # Budget Operating Cost Percentage - float, 0<=X<=1
+            text = values['-BUDGET-OPERATING-']
+            try:
+                num = float(text)
+                assert(0 <= num <= 1)
+                window['-BUDGET-OPERATING-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-BUDGET-OPERATING-'].update(background_color='red')
+                someError = True
+
+            # Total Fleet Size - integer, 0<X
+            text = values['-FLEET-SIZE-']
+            try:
+                num = int(text)
+                assert(0 < num)
+                window['-FLEET-SIZE-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-FLEET-SIZE-'].update(background_color='red')
+                someError = True
+
+            # Annual Mileage - integer, 0<=X
+            text = values['-ANNUAL-MILES-']
+            try:
+                num = int(text)
+                assert(0 <= num)
+                window['-ANNUAL-MILES-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-ANNUAL-MILES-'].update(background_color='red')
+                someError = True
+
+            # Weighted MPG - float, 0<X
+            text = values['-WEIGHTED-MPG-']
+            try:
+                num = float(text)
+                assert(0 < num)
+                window['-WEIGHTED-MPG-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-WEIGHTED-MPG-'].update(background_color='red')
+                someError = True
+
+            # Fuel Price - float, 0<=X
+            text = values['-FUEL-PRICE-']
+            try:
+                num = float(text)
+                assert(0 <= num)
+                window['-FUEL-PRICE-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-FUEL-PRICE-'].update(background_color='red')
+                someError = True
+
+            # Maintenance and Repairs Year 1 Cost - integer, 0<=X
+            text = values['-MR-COST-']
+            try:
+                num = int(text)
+                assert(0 <= num)
+                window['-MR-COST-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-MR-COST-'].update(background_color='red')
+                someError = True
+
+            # Diesel Bus Total Price - integer, 0<=X
+            text = values['-DIESEL-PRICE-']
+            try:
+                num = int(text)
+                assert(0 <= num)
+                window['-DIESEL-PRICE-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-DIESEL-PRICE-'].update(background_color='red')
+                someError = True
+            
+            # Diesel Finance Rate - float, 0<=X<=1
+            text = values['-DIESEL-RATE-']
+            try:
+                num = float(text)
+                assert(0 <= num <= 1)
+                window['-DIESEL-RATE-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-DIESEL-RATE-'].update(background_color='red')
+                someError = True
+
+            # Diesel Finance Term - integer, 0<=X
+            text = values['-DIESEL-TERM-']
+            try:
+                num = int(text)
+                assert(0 <= num)
+                window['-DIESEL-TERM-'].update(background_color=sg.theme_input_background_color())
+            except:
+                window['-DIESEL-TERM-'].update(background_color='red')
+                someError = True
+
+            if someError:
+                continue
 
             # Get the user input information
             userInputs = []
