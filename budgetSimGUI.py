@@ -433,7 +433,8 @@ def create_budget_graphs(inputs):
     plt.title('Short Term Bottom Up Analysis')
 
     fig.tight_layout()
-
+    fig.set_figheight(6)
+    fig.set_figwidth(8)
     return plt.gcf()
 
 def create_empty_graph():
@@ -443,6 +444,8 @@ def create_empty_graph():
     plt.sca(axes[1,0])
     plt.sca(axes[1,1])
 
+    fig.set_figheight(6)
+    fig.set_figwidth(8)
     return plt.gcf()
 
 def delete_prev_graph(curr_fig):
@@ -476,7 +479,7 @@ if __name__ == '__main__':
 
     layout = [
         [sg.VP()],
-        [sg.P(), sg.Column(layoutCol1),
+        [sg.P(), sg.Column(layoutCol1, key='-COLUMN-ONE-'),
         sg.Column(layoutCol2), sg.P()],
         [sg.VP()]
     ]
@@ -487,23 +490,48 @@ if __name__ == '__main__':
         figure_canvas_agg.get_tk_widget().pack(fill='both', expand=1, side='right')
         return figure_canvas_agg
 
-    window = sg.Window('Budget Simulation', layout, element_justification='right', finalize=True)
+    window = sg.Window('Budget Simulation', layout, element_justification='right', finalize=True, resizable=True)
+    # Set minimum window resizable size
+    window.TKroot.minsize(1250, 650)
+
+    # Keep track of window size
+    window.bind('<Configure>',"Event")
 
     curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
 
     while (True):
         event, values = window.read()
 
+        # mouse = values['-COLUMN-ONE-']
+        # if event == '-COLUMN-ONE-':
+        #     if mouse == (None, None):
+        #         continue
+
+
+        if event == "Event":
+            print(window.size)
+
         if event == sg.WINDOW_CLOSED:
             break
         if event=="Create Simulation Graphs":
             # User Error Checking
             
-            #
-            #
-            #
-            #
-            #
+            
+            test = int(values['-DEPLOY-YEAR-'])
+            
+            
+            
+            
+
+            # text = values['lp1']
+            # if text == '':
+            #     print('Null string')
+            # else:
+            #     try:
+            #         value = int(text)
+            #         print(f'Integer: {value}')
+            #     except:
+            #         print("Not Integer")
 
 
             # Get the user input information
@@ -525,7 +553,9 @@ if __name__ == '__main__':
 
             # Delete old graph and replace with updated graph
             delete_prev_graph(curr_fig)
-            curr_fig = draw_figure(window['canvas'].TKCanvas, create_budget_graphs(userInputs))
+            tempGraph = create_budget_graphs(userInputs)
+            # tempGraph.subplots_adjust(right=1.2)
+            curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
 
 
 
