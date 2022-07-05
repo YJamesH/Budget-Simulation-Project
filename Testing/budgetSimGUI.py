@@ -1,10 +1,12 @@
 # Plotting 
 from csv import excel
+from this import s
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.ticker import FuncFormatter
 import numpy
 import numpy as np
+import math
 
 # GUI 
 import PySimpleGUI as sg
@@ -85,60 +87,62 @@ def create_budget_graphs(inputs):
     MREsc1 = excelVars.iat[5,0]                 # M&R escalator in first half-life
     MREsc2 = excelVars.iat[6,0]                 # M&R escalator in second half-life
 
+
     # Highland Contract
-    annualDeployed = []
-    annualContract = []
+    annualDeployed = [0]
+    annualContract = [0]
     for i in range(20):
         annualDeployed.append(excelContract.iat[i,0]) 
         annualContract.append(excelContract.iat[i,1])
 
-    # --------------------------------------------------- #
-
-    # # Statistics summary
-    # print("\n Summary ")
-    # print("Deployment Year              ", deploymentYear)
-    # print("Contract Term                ", deploymentYear)
-    # print("Annual Budget                ", annualBudget)
-    # print("Annual Budget Salary         ", annualBudgetSal)
-    # print("Annual Budget Capital        ", annualBudgetCap)
-    # print("Annual Budget Operating      ", annualBudgetOp)
-
-    # print("Total Fleet Size is          ", fleetSize)
-    # print("Annual mileage with gas is   ", annualMiles)
-    # print("Gas Bus MPG is               ", weightedMPG)
-    # print("Fuel Price per Gallon        ", fuelPriceGal)
-    # print("Maintenance & Repair Cost    ", MRCost)
-
-    # print("Diesel Bus Purchase Price is ", dieselPrice)
-    # print("Diesel Bus Financing Rate is ", dieselRate)
-    # print("Diesel Bus Financing Term is ", dieselTerm)
-
-    # print("\n ")
-    # print("Contract Bus Price/Year      ", contractPrice)
-    # print("Contract Bus Escalator       ", contractEsc)
-    # print("Diesel Bus Escalator         ", dieselPriceEsc)
-    # print("Overhead Allocation Cost     ", overheadAllocation)
-    # print("Other Costs Escaltor         ", costEsc)
-    # print("M&R first half-life          ", MREsc1)
-    # print("M&R second half-life         ", MREsc2)
-
-    # print("Annual Deploy", annualDeployed)
-    # print("Annual Contract Price", annualContract)
 
     # --------------------------------------------------- #
-    # Example Highland Contract Total Budget
+    # Highland Contract Total Price per Year Cumulative
 
-    contractYearPrice = [0]*20
+    contractYearPrice = [0]*21
 
-    for simDepYear in range(20):
-        contractPrice = annualDeployed[simDepYear] * annualContract[simDepYear]
+    for simDepYear in range(21):
+        CYPPrice = annualDeployed[simDepYear] * annualContract[simDepYear]
         for simAddYear in range(simDepYear, simDepYear+contractTerm):
-            if simAddYear == 20:
+            if simAddYear == 21:
                 break
-            contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + contractPrice)
-            contractPrice = contractPrice * (1+contractEsc)
+            contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + CYPPrice)
+            CYPPrice = CYPPrice * (1+contractEsc)
 
-    # print("Contract", contractYearPrice, "\n")
+    # --------------------------------------------------- #
+
+    # Statistics summary
+    print("\n Summary ")
+    print("Deployment Year              ", deploymentYear)
+    print("Contract Term                ", deploymentYear)
+    print("Annual Budget                ", annualBudget)
+    print("Annual Budget Salary         ", annualBudgetSal)
+    print("Annual Budget Capital        ", annualBudgetCap)
+    print("Annual Budget Operating      ", annualBudgetOp)
+
+    print("Total Fleet Size is          ", fleetSize)
+    print("Annual mileage with gas is   ", annualMiles)
+    print("Gas Bus MPG is               ", weightedMPG)
+    print("Fuel Price per Gallon        ", fuelPriceGal)
+    print("Maintenance & Repair Cost    ", MRCost)
+
+    print("Diesel Bus Purchase Price is ", dieselPrice)
+    print("Diesel Bus Financing Rate is ", dieselRate)
+    print("Diesel Bus Financing Term is ", dieselTerm)
+
+    print("\n ")
+    print("Contract Bus Price/Year      ", contractPrice)
+    print("Contract Bus Escalator       ", contractEsc)
+    print("Diesel Bus Escalator         ", dieselPriceEsc)
+    print("Overhead Allocation Cost     ", overheadAllocation)
+    print("Other Costs Escaltor         ", costEsc)
+    print("M&R first half-life          ", MREsc1)
+    print("M&R second half-life         ", MREsc2)
+
+    print("Annual Deploy", annualDeployed)
+    print("Annual Contract Price", annualContract)
+    print("Contract Year Price", contractYearPrice, "\n")
+
 
     # --------------------------------------------------- #
     # Diesel Total Cost of Ownership (TCO)
@@ -173,125 +177,132 @@ def create_budget_graphs(inputs):
         overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
     # Prints
-    # print("TCO", purchaseTCO)
-    # print("TCO", mrTCO)
-    # print("TCO", fuelTCO)
-    # print("TCO", overheadTCO, "\n")
+    print("TCO", purchaseTCO)
+    print("TCO", mrTCO)
+    print("TCO", fuelTCO)
+    print("TCO", overheadTCO, "\n")
 
     # --------------------------------------------------- #
     # Diesel Costs avoided  - Break down
 
-    purchaseDCA = [0]*20
-    mrDCA = [0]*20
-    fuelDCA = [0]*20
+    purchaseDCA = [0]*contractTerm
+    mrDCA = [0]*contractTerm
+    fuelDCA = [0]*contractTerm
     overheadDCA = []
 
     # Purchase costs avoided
-    for simDepYear in range(20):
+    for simDepYear in range(contractTerm):
         currPrice = int(dieselPrice * pow(1+dieselPriceEsc, simDepYear))
         simCost = annualDeployed[simDepYear] * pmtCalc(dieselRate, dieselTerm, currPrice)
         for simAddYear in range(dieselTerm):
-            if simDepYear+simAddYear < 20:
+            if (simDepYear+simAddYear) < (contractTerm):
                 purchaseDCA[simDepYear+simAddYear] = purchaseDCA[simDepYear+simAddYear] + simCost
+    purchaseDCA.insert(0,0)
 
     # M&R costs avoided
-    for simDepYear in range(20):
+    for simDepYear in range(contractTerm):
         currMRCost = MRCost * pow(1+costEsc, simDepYear)
         yearlyMR = currMRCost * annualDeployed[simDepYear]
         for simAddYear in range(simDepYear, simDepYear+contractTerm):
-            if simAddYear == 20:
+            if simAddYear == contractTerm:
                 break
             mrDCA[simAddYear] = int(mrDCA[simAddYear] + yearlyMR)
             if (simAddYear+1-simDepYear) < (contractTerm-1)/2:
                 yearlyMR = yearlyMR * (1+MREsc1)
             else:
                 yearlyMR = yearlyMR * (1+MREsc2)
+    mrDCA.insert(0,0)
+    
 
     # Fuel costs avoided
-    for simDepYear in range(20):
+    for simDepYear in range(contractTerm):
         currFuelCost = fuelTCO[0] * pow(1+costEsc, simDepYear)
         yearlyFuel = currFuelCost * annualDeployed[simDepYear]
         for simAddYear in range(simDepYear, simDepYear+contractTerm):
-            if simAddYear == 20:
+            if simAddYear == contractTerm:
                 break
             fuelDCA[simAddYear] = int(fuelDCA[simAddYear] + yearlyFuel)
             yearlyFuel = yearlyFuel * (1+costEsc)
+    fuelDCA.insert(0,0)
 
     # Overhead costs avoided
-    for simDepYear in range(20):
+    for simDepYear in range(contractTerm):
         overheadDCA.append(int(overheadAllocation*(fuelDCA[simDepYear] + mrDCA[simDepYear])))
+    overheadDCA.insert(0,0)
 
     # Prints
-    # print("DCA", purchaseDCA)
-    # print("DCA", mrDCA)
-    # print("DCA", fuelDCA)
-    # print("DCA", overheadDCA, "\n")
+    print("DCA", purchaseDCA)
+    print("DCA", mrDCA)
+    print("DCA", fuelDCA)
+    print("DCA", overheadDCA, "\n")
 
     # --------------------------------------------------- #
     # Relative Budget Neutrality
+
+    # Total Diesel Costs Avoided
     totalDCA = []
-    for i in range(20):
+    for i in range(contractTerm+1):
         totalDCA.append(purchaseDCA[i] + mrDCA[i] + fuelDCA[i] + overheadDCA[i])
 
     ### Budget Difference ###
+    budgetStaQuo = []
+    for simDepYear in range(contractTerm+1):
+        budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
+
     budgetDiffRBN = []
-    for i in range(20):
-        budgetDiffRBN.append(totalDCA[i]-contractYearPrice[i])
+    for i in range(contractTerm+1):
+        tempSub = totalDCA[i]-contractYearPrice[i]
+        budgetDiffRBN.append(tempSub)
 
     ### Total Budget With Highland ###
-    budgetStaQuo = []
     finalRBudget = []
-    for simDepYear in range(20):
-        budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
-    for simDepYear in range(20):
-        finalRBudget.append(budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear])
-
-    # maybe make one for individual
-    #   budget w/ highland     \
-    #   budget w/o highland   --- compare
-
+    for simDepYear in range(contractTerm+1):
+        tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
+        if tempSub<0:
+            tempSub=0
+        finalRBudget.append(tempSub)
 
     # Prints
-    # print("Total DCA", totalDCA)
-    # print("Budget Diff", budgetDiffRBN)
+    print("Total DCA", totalDCA)
+    print("Budget Diff RBN", budgetDiffRBN)
 
-    # print("Budget Status Quo", budgetStaQuo)
-    # print("Relative Budget", finalRBudget, "\n")
+    print("Budget Status Quo", budgetStaQuo)
+    print("Final Relative Budget", finalRBudget, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
     evCostReduction = []
     evCostReduction.append(annualDeployed[0]/fleetSize)
-    for simDepYear in range(1,20):
+    for simDepYear in range(1,contractTerm+1):
         tempPerc = round(evCostReduction[simDepYear-1] + annualDeployed[simDepYear]/fleetSize,3)
         if tempPerc > 100:
             tempPerc = 100
-        evCostReduction.append(round(evCostReduction[simDepYear-1] + annualDeployed[simDepYear]/fleetSize,3))
+        evCostReduction.append(tempPerc)
 
     ## Starts one year before deploy (i.e. 2022) ##
     buOperatingSQ = []
-    for simDepYear in range(0,21):      
+    for simDepYear in range(contractTerm+1):      
         buOperatingSQ.append(int(annualBudgetOp * pow(1+costEsc, simDepYear))) 
 
     buOperatingCosts = []
     buOperatingCosts.append(buOperatingSQ[0])
-    for simDepYear in range(20):   
+    for simDepYear in range(contractTerm+1):   
         tempOpCost = int(buOperatingSQ[simDepYear] * (1-evCostReduction[simDepYear]))
         if tempOpCost < 0:
             tempOpCost = 0
         buOperatingCosts.append(tempOpCost)
 
     buPersonnelCosts = []
-    for simDepYear in range(21):   
+    for simDepYear in range(contractTerm+1):   
         buPersonnelCosts.append(int(annualBudgetSal * pow(1+costEsc, simDepYear)))
 
     # total minus diesel buses
     buTotalPrice = []
-    for i in range(21):
+    for i in range(contractTerm+1):
         buTotalPrice.append(int(buOperatingCosts[i] + buPersonnelCosts[i]))
     # total with highland contract
     buTotalPrice[0] = buTotalPrice[0]+annualBudgetCap
-    for simDepYear in range(1,21):
+    for simDepYear in range(1,contractTerm+1):
         buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
 
@@ -316,14 +327,14 @@ def create_budget_graphs(inputs):
     cumulCarbonReduced = []         # Cumulative Carbon reduced since deployment year
 
     totalDeployed.append(annualDeployed[0])
-    for i in range(1,20):
+    for i in range(1,contractTerm+1):
         totalDeployed.append(totalDeployed[i-1]+annualDeployed[i])
-    for i in range(20):
+    for i in range(contractTerm+1):
         totalGalAvoided.append((totalDeployed[i]*annualMiles)/weightedMPG)
-    for i in range(20):
+    for i in range(contractTerm+1):
         annualCarbonReduced.append(CO2DieselConstant*totalGalAvoided[i])
     cumulCarbonReduced.append(round(annualCarbonReduced[0],1))
-    for i in range(1,20):
+    for i in range(1,contractTerm+1):
         cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
     # print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
@@ -333,87 +344,123 @@ def create_budget_graphs(inputs):
 
     fig, axes = plt.subplots(nrows = 2, ncols = 2)
 
-    yearsADep = []
-    for years in range(deploymentYear, deploymentYear+20):
-        yearsADep.append(years)
-    yearsWDep = yearsADep.copy()
-    yearsWDep.insert(0, deploymentYear-1)
-    yearsShown = []
-    for years in range(0,21,4):
-        yearsShown.append(yearsWDep[years])
+    yearsWDep = []
+    for years in range(deploymentYear-1, deploymentYear+contractTerm):
+        yearsWDep.append(years)
+
+
+    # X Axis Formatting
+    def xAxisCalculator(term, xAxisTemp):
+        if term == 5:
+            for i in range(5):
+                xAxisTemp.append(xAxisTemp[-1]+1)
+        elif term>=6 and term<=11:
+            divTemp = math.floor(term/2)-1
+            for i in range(divTemp):
+                xAxisTemp.append(xAxisTemp[-1]+2)
+            xAxisTemp.append(xAxisTemp[0]+term)
+        # elif term>=12 and term<=14:
+        #     for i in range(3):
+        #         xAxisTemp.append(xAxisTemp[-1]+3)
+        #     xAxisTemp.append(xAxisTemp[0]+term)
+        else:
+            xCalcDiv = math.floor(term/5)
+            xCalcMod = (term)%5
+            for i in range(5-xCalcMod):
+                xAxisTemp.append(xAxisTemp[-1]+xCalcDiv)
+            for i in range(xCalcMod):
+                xAxisTemp.append(xAxisTemp[-1]+(xCalcDiv+1))
+
+        return xAxisTemp
+
+
+    xAxisShown = [deploymentYear-1]
+    xAxisShown = xAxisCalculator(contractTerm, xAxisShown)
+
+    xAxisFig4 = np.arange(deploymentYear-1, deploymentYear+5, 1)
 
     # formatting
     formatMillions = FuncFormatter(millions)
     formatThousands = FuncFormatter(thousands)
 
+
     # Figure 1 - Budget Neutral Transition
     plt.sca(axes[0,0])
-    plt.plot(yearsADep, budgetStaQuo, 'r', label='Budget SQ')
+    plt.plot(yearsWDep, budgetStaQuo[0:contractTerm+1], 'r', label='Budget SQ')
     plt.plot([], [], 'b', linewidth=5)     # Houston ISD Budget
     plt.plot([], [], 'y', linewidth=5)     # Budget with Highland
-    plt.stackplot(yearsADep, finalRBudget, budgetDiffRBN, colors=['b','y'])
+    plt.stackplot(yearsWDep, finalRBudget[0:contractTerm+1], budgetDiffRBN[0:contractTerm+1], colors=['b','y'])
 
+    # Figure Y Max
+    Fig1YMax = round(budgetStaQuo[contractTerm]+10000000,-7)
+
+    # Figure 1 Graph Labeling
     plt.ticklabel_format(style = 'plain')
     axes[0,0].yaxis.set_major_formatter(formatMillions)
-    plt.xticks(yearsShown)
-    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.xticks(xAxisShown)
+    plt.yticks(np.arange(0, Fig1YMax, round(Fig1YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
     # plt.legend(["Budget Status Quo", "Budget with Highland", "Budget saved"], loc='lower right')
     plt.title('Budget Neutral Transition')
 
-    # # set background color
-    # axes = plt.gca()
-    # axes.set_facecolor('#fffeea')
-
 
     # Figure 2 - Bottom Up Budget Analysis
     plt.sca(axes[0,1])
-    budgetStaQuo1 = budgetStaQuo.copy()
-    budgetStaQuo1.append(int(annualBudget*pow(1+costEsc, 20)))
-    plt.plot(yearsWDep, budgetStaQuo1, 'r', label='Budget SQ') ##############################
-    plt.bar(yearsWDep, buOperatingCosts, color='m',)
-    plt.bar(yearsWDep, buPersonnelCosts, bottom=buOperatingCosts, color='b')
+
+    plt.plot(yearsWDep, budgetStaQuo[0:contractTerm+1], 'r', label='Budget SQ') ##############################
+    plt.bar(yearsWDep, buOperatingCosts[0:contractTerm+1], color='m',)
+    plt.bar(yearsWDep, buPersonnelCosts[0:contractTerm+1], bottom=buOperatingCosts[0:contractTerm+1], color='b')
     # Since operating costs and personnel costs are not arrays, need to combine lists
     CYPFormat = contractYearPrice.copy()
     CYPFormat.insert(0,0)
     OpPerSum = []
-    for i in range(21):
+    for i in range(contractTerm+1):
         OpPerSum.append(buOperatingCosts[i]+buPersonnelCosts[i])
-    plt.bar(yearsWDep, CYPFormat, bottom=OpPerSum, color='c')
+    plt.bar(yearsWDep, CYPFormat[0:contractTerm+1], bottom=OpPerSum[0:contractTerm+1], color='c')
     plt.bar(deploymentYear-1, annualBudgetCap, bottom=CYPFormat[0]+buOperatingCosts[0]+buPersonnelCosts[0], color='k')
 
+    # Figure 2 Y Max
+    comp1 = budgetStaQuo[contractTerm]
+    comp2 = buOperatingCosts[contractTerm]+buPersonnelCosts[contractTerm]+CYPFormat[contractTerm]
+    Fig2YMax = 0
+    if comp1 < comp2:
+        Fig2YMax = round(comp2+10000000,-7)
+    else:
+        Fig2YMax = round(comp1+10000000,-7)
+
+    # Figure 2 Graph Labeling
     plt.ticklabel_format(style = 'plain')
     axes[0,1].yaxis.set_major_formatter(formatMillions)
-    plt.xticks(yearsShown)
-    plt.yticks(np.arange(0, 110000000, 10000000))
+    plt.xticks(xAxisShown)
+    plt.yticks(np.arange(0, Fig2YMax, round(Fig2YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
     # plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract", "Budget Capital Cost"], bbox_to_anchor=(1, 1))
     plt.title('Bottom Up Analysis')
 
 
-
-
     # Figure 3 - Carbon Reduction Line Graph 
     plt.sca(axes[1,0])
-    plt.plot(yearsADep, cumulCarbonReduced, 'c', label='Expected Carbon Reduction')
+    plt.plot(yearsWDep, cumulCarbonReduced[0:contractTerm+1], 'r', label='Expected Carbon Reduction')
 
+    # Figure 3 Y Max
+    Fig3YMax = round((cumulCarbonReduced[contractTerm]+10000), -4)
+
+    # Figure 3 Graph Labeling
     plt.ticklabel_format(style = 'plain')
     axes[1,0].yaxis.set_major_formatter(formatThousands)
-    plt.xticks(yearsShown)
-    yStep = 25000
-    CCRyMax = round((cumulCarbonReduced[-1]+ yStep)/yStep) *25000
-    plt.yticks(np.arange(0, CCRyMax, yStep))
-    plt.ylabel('Metric Tons')
+    plt.xticks(xAxisShown)
+    plt.yticks(np.arange(0, Fig3YMax, Fig3YMax/5))
+    plt.ylabel('Metric Tons (Thousand)')
     plt.xlabel('Year')
     # plt.legend(loc='upper left')
     plt.title('Cumulative CO2 (M.Ton) Reduced')
 
 
     # Figure 4 - Short Term Bottom Up analysis
-    fiveYearSim = [deploymentYear-1]
-    for i in range(6):
+    fiveYearSim = []
+    for i in range(-1,5):
         fiveYearSim.append(deploymentYear+i)
     plt.sca(axes[1,1])
 
@@ -421,7 +468,7 @@ def create_budget_graphs(inputs):
     fiveBuOperatingCosts = []
     fiveBuPersonnelCosts = []
     fiveCYPFormat = []
-    for i in range(7):
+    for i in range(6):
         fiveBudgetStaQuo.append(budgetStaQuo[i])
         fiveBuOperatingCosts.append(buOperatingCosts[i])
         fiveBuPersonnelCosts.append(buPersonnelCosts[i])
@@ -433,14 +480,25 @@ def create_budget_graphs(inputs):
 
     # Since operating costs and personnel costs are not arrays, need to combine lists
     fiveOpPerSum = []
-    for i in range(7):
+    for i in range(6):
         fiveOpPerSum.append(fiveBuOperatingCosts[i]+fiveBuPersonnelCosts[i])    
     plt.bar(fiveYearSim, fiveCYPFormat, bottom=fiveOpPerSum, color='c')
+    plt.bar(deploymentYear-1, annualBudgetCap, bottom=CYPFormat[0]+buOperatingCosts[0]+buPersonnelCosts[0], color='k')
 
+    # Figure 4 Y max
+    comp1 = budgetStaQuo[5]
+    comp2 = buOperatingCosts[5]+buPersonnelCosts[5]+CYPFormat[5]
+    Fig4YMax = 0
+    if comp1 < comp2:
+        Fig4YMax = round(comp2+10000000,-7)
+    else:
+        Fig4YMax = round(comp1+10000000,-7)
+
+    # Figure 4 Graph Labeling
     plt.ticklabel_format(style = 'plain')
     axes[1,1].yaxis.set_major_formatter(formatMillions)
-    plt.xticks(np.arange(deploymentYear-1, deploymentYear+6, 1))
-    plt.yticks(np.arange(0, 100000000, 10000000))
+    plt.xticks(xAxisFig4)
+    plt.yticks(np.arange(0, Fig4YMax, round(Fig4YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
     # plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
@@ -482,37 +540,45 @@ if __name__ == '__main__':
 
     sg.theme('LightBlue7')
 
+    # Get last inputted -- file is formatted in same order as displayed inputs
+    savedInputs = []
+    with open(r'./Settings/previousInputs.txt', 'r') as inputFile:
+        for line in inputFile:
+            for input in line.split():
+                savedInputs.append(input)
+
     layoutCol1 = [
         [sg.P(background_color='#fffeea'), sg.T('Deployment Year', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="2023", key='-DEPLOY-YEAR-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 2))],
+                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 2))],
         [sg.P(background_color='#fffeea'), sg.T('Contract Term', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="15", key='-CONTRACT-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[1], key='-CONTRACT-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Annual Budget', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="60000000", key='-ANNUAL-BUDGET-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[2], key='-ANNUAL-BUDGET-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Salary %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=".66", key='-BUDGET-SALARY-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Capital Cost %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=".17", key='-BUDGET-CAPITAL-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Operating Cost %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=".17", key='-BUDGET-OPERATING-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Fleet Size', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="800", key='-FLEET-SIZE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[6], key='-FLEET-SIZE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Annual Mileage', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="9000", key='-ANNUAL-MILES-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[7], key='-ANNUAL-MILES-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Average MPG', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="6", key='-WEIGHTED-MPG-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[8], key='-WEIGHTED-MPG-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Fuel Cost per Gallon', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="2.5", key='-FUEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[9], key='-FUEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Maintenance & Repairs Cost', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="6000", key='-MR-COST-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[10], key='-MR-COST-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Purchase Price', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="120000", key='-DIESEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[11], key='-DIESEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Rate', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=".03", key='-DIESEL-RATE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Term', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text="5", key='-DIESEL-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+                    sg.I(default_text=savedInputs[13], key='-DIESEL-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), 
                     sg.B('Create Simulation Graphs', font='_ 16 bold'), 
+                    sg.B('Reset Inputs', font='_ 16 bold'), 
                     sg.B('Save', font='_ 16 bold', disabled=True)
         ]
     ]
@@ -558,10 +624,10 @@ if __name__ == '__main__':
         event, values = window.read()
 
         # Mouse over options
-        # mouse = values['-COLUMN-ONE-']
-        # if event == '-COLUMN-ONE-':
+        # mouse = values['-MOUSE-']
+        # if event == '-MOUSE-':
         #     if mouse == (None, None):
-        #         continue
+        #         print("I CLICKED!!!")
 
         # Resizable graph and inputs based on window size?
         # if event == "Event":
@@ -574,21 +640,27 @@ if __name__ == '__main__':
             # User Error Checking
             someError = False
 
+            # Grab bounds for Deploy Year and Contract Term
+            excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=9, nrows=3)
+            DYLowerBound = excelBounds.iat[0,0]
+            CTLowerBound = excelBounds.iat[1,0]
+            CTUpperBound = excelBounds.iat[2,0]
+
             # Deployment Year - integer, 2021<X
             text = values['-DEPLOY-YEAR-']
             try:
                 num = int(text)
-                assert(num > 2021)
+                assert(num >= DYLowerBound)
                 window['-DEPLOY-YEAR-'].update(background_color='#ffffff')
             except:
                 window['-DEPLOY-YEAR-'].update(background_color='red')
                 someError = True
 
-            # Contract Term - integer, 0<X<=20
+            # Contract Term - integer, 5<X<=20
             text = values['-CONTRACT-TERM-']
             try:
                 num = int(text)
-                assert(0 < num <= 20)
+                assert(CTLowerBound <= num <= CTUpperBound)
                 window['-CONTRACT-TERM-'].update(background_color='#ffffff')
             except:
                 window['-CONTRACT-TERM-'].update(background_color='red')
@@ -734,6 +806,12 @@ if __name__ == '__main__':
             userInputs.append(float(values['-DIESEL-RATE-']))
             userInputs.append(int(values['-DIESEL-TERM-']))
 
+            # Update Previous Inputs file
+            with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
+                for input in userInputs:
+                    inputFile.write(str(input)) 
+                    inputFile.write(' ')
+
             # Delete old graph and replace with updated graph
             delete_prev_graph(curr_fig)
             tempGraph = create_budget_graphs(userInputs)
@@ -742,6 +820,37 @@ if __name__ == '__main__':
             window['Save'].update(disabled=False)
             curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
 
+        if event=="Reset Inputs":
+            # Get inputs from backup file
+            newInputs = []
+            with open(r'./Settings/backupInputs.txt', 'r') as inputFile:
+                for line in inputFile:
+                    for input in line.split():
+                        newInputs.append(input)
 
+            # Update User Window
+            window['-DEPLOY-YEAR-'].update(newInputs[0])
+            window['-CONTRACT-TERM-'].update(newInputs[1])
+            window['-ANNUAL-BUDGET-'].update(newInputs[2])
+            window['-BUDGET-SALARY-'].update(newInputs[3])
+            window['-BUDGET-CAPITAL-'].update(newInputs[4])
+            window['-BUDGET-OPERATING-'].update(newInputs[5])
+            window['-FLEET-SIZE-'].update(newInputs[6])
+            window['-ANNUAL-MILES-'].update(newInputs[7])
+            window['-WEIGHTED-MPG-'].update(newInputs[8])
+            window['-FUEL-PRICE-'].update(newInputs[9])
+            window['-MR-COST-'].update(newInputs[10])
+            window['-DIESEL-PRICE-'].update(newInputs[11])
+            window['-DIESEL-RATE-'].update(newInputs[12])
+            window['-DIESEL-TERM-'].update(newInputs[13])
+
+            # Write to previous Inputs
+            with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
+                for input in newInputs:
+                    inputFile.write(str(input)) 
+                    inputFile.write(' ')
+
+        if event=="Save":
+            pass
 
     window.close()
