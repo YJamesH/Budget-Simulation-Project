@@ -1,6 +1,8 @@
 # Plotting 
+from calendar import c
 from csv import excel
 from this import s
+from webbrowser import BackgroundBrowser
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.ticker import FuncFormatter
@@ -538,7 +540,25 @@ def delete_prev_graph(curr_fig):
 
 if __name__ == '__main__':
 
-    sg.theme('LightBlue7')
+    # Window Colors and background  
+    # #fffeea                         tan yellow
+    # #338165                         green
+    # #3d4043                         gray
+    # #f0bf4c                         bus yellow
+    # #fdbd1c                         button yellow
+
+    # Background Colors and Theme
+    sg.theme_background_color(color = '#b9b9b9')
+    sg.theme_button_color(color = ('#3d4043', '#fdbd1c'))          # button text, button background
+    sg.theme_input_background_color(color='#ffffff')
+    sg.theme_input_text_color(color='#3d4043')
+    sg.theme_text_color(color='#3d4043')    
+    sg.theme_text_element_background_color(color='#fffeea')
+
+    # sg.theme_element_background_color(color='#6a0dad')   
+    # sg.theme_element_text_color(color='#6a0dad')
+
+
 
     # Get last inputted -- file is formatted in same order as displayed inputs
     savedInputs = []
@@ -548,53 +568,65 @@ if __name__ == '__main__':
                 savedInputs.append(input)
 
     layoutCol1 = [
-        [sg.P(background_color='#fffeea'), sg.T('Deployment Year (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 2))],
-        [sg.P(background_color='#fffeea'), sg.T('Contract Term (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Salary (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Capital Cost (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Operating Cost (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Fleet Size (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Mileage (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Average MPG (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Fuel Cost per Gallon ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Maintenance & Repairs Cost ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Purchase Price ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Rate (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Term (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), 
-                    sg.B('Create Simulation Graphs', font='_ 16 bold'), 
+        # [sg.T('', background_color='#fffeea')],
+        [sg.VP()],
+        [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
+                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 0))],
+        [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Annual Budget - Salary (%)', font='_ 17 bold'), 
+                    sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='_ 17 bold'), 
+                    sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Annual Budget - Operating Cost (%)', font='_ 17 bold'), 
+                    sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Fleet Size (#)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Annual Mileage (#)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Average MPG (#)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Fuel Cost per Gallon ($)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Maintenance & Repairs Cost ($)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Diesel Bus Purchase Price ($)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Diesel Bus Financing Rate (%)', font='_ 17 bold'), 
+                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font='_ 17 bold'), 
+                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.VP()],
+        [sg.P(), 
+                    sg.B('Plot!', font='_ 16 bold'), 
                     sg.B('Reset Inputs', font='_ 16 bold'), 
                     sg.B('Save', font='_ 16 bold', disabled=True)
         ]
     ]
     
     layoutCol2 = [
-        [sg.P(), sg.T('Budget Simulation',font='_ 24 bold', text_color='#3d4043'), sg.P()],
-        [sg.Canvas(key='canvas'), sg.P()],
+        [sg.Canvas(key='canvas')]
+    ]
+
+    layoutTopRow = [    
+        [sg.P(background_color='#338165'), 
+            sg.T('Highland Fleets Budget Simulation', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
+        sg.P(background_color='#338165')]
     ]
 
     layout = [
-        [sg.VP()], [sg.P(), 
-                    sg.Column(layoutCol1, key='-COLUMN-ONE-', background_color='#fffeea'),
-                    sg.Column(layoutCol2), 
-                    sg.P()],
+        [sg.Column(layoutTopRow, expand_x=True, pad=((0,0),(0,0)), background_color='#338165')],
+        [sg.VP()], 
+            [sg.P(), 
+                sg.Column(layoutCol1, key='-COLUMN-ONE-', expand_y=True, expand_x=True, background_color='#fffeea'),
+                sg.Column(layoutCol2, key = '-COLUMN-TWO-', expand_y=True, expand_x=True, background_color='#fffeea'), 
+            sg.P()
+            ],
         [sg.VP()]
     ]
+
 
     def draw_figure(canvas, figure):
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
@@ -602,13 +634,9 @@ if __name__ == '__main__':
         figure_canvas_agg.get_tk_widget().pack(fill='both', expand=1, side='right')
         return figure_canvas_agg
 
-    # Window Colors and background  
-    # background_color='#fffeea'        yellow
-    # background_color='#338165'        green
-    # text_color='#3d4043'              gray
 
 
-    window = sg.Window('Budget Simulation', layout, element_justification='right', finalize=True, resizable=True)
+    window = sg.Window('Budget Simulation', layout, element_justification='right', finalize=True, margins=(0,0))
 
     # Set minimum window resizable size
     window.TKroot.minsize(1250, 650)
@@ -635,7 +663,7 @@ if __name__ == '__main__':
 
         if event == sg.WINDOW_CLOSED:
             break
-        if event=="Create Simulation Graphs":
+        if event=="Plot!":
             
             # User Error Checking
             someError = False
