@@ -548,34 +548,34 @@ if __name__ == '__main__':
                 savedInputs.append(input)
 
     layoutCol1 = [
-        [sg.P(background_color='#fffeea'), sg.T('Deployment Year', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+        [sg.P(background_color='#fffeea'), sg.T('Deployment Year (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
                     sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 2))],
-        [sg.P(background_color='#fffeea'), sg.T('Contract Term', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[1], key='-CONTRACT-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[2], key='-ANNUAL-BUDGET-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Salary %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+        [sg.P(background_color='#fffeea'), sg.T('Contract Term (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Annual Budget ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Salary (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
                     sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Capital Cost %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Capital Cost (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
                     sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Operating Cost %', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+        [sg.P(background_color='#fffeea'), sg.T('Annual Budget - Operating Cost (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
                     sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Fleet Size', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[6], key='-FLEET-SIZE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Annual Mileage', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[7], key='-ANNUAL-MILES-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Average MPG', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[8], key='-WEIGHTED-MPG-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Fuel Cost per Gallon', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[9], key='-FUEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Maintenance & Repairs Cost', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[10], key='-MR-COST-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Purchase Price', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[11], key='-DIESEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Rate', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+        [sg.P(background_color='#fffeea'), sg.T('Fleet Size (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Annual Mileage (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Average MPG (#)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Fuel Cost per Gallon ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Maintenance & Repairs Cost ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Purchase Price ($)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Rate (%)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
                     sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
-        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Term', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
-                    sg.I(default_text=savedInputs[13], key='-DIESEL-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
+        [sg.P(background_color='#fffeea'), sg.T('Diesel Bus Financing Term (Y)', font='_ 16 bold', background_color='#fffeea', text_color='#3d4043'), 
+                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', background_color='#ffffff', text_color='#3d4043', do_not_clear=True, size=(9, 1))],
         [sg.P(background_color='#fffeea'), 
                     sg.B('Create Simulation Graphs', font='_ 16 bold'), 
                     sg.B('Reset Inputs', font='_ 16 bold'), 
@@ -649,6 +649,7 @@ if __name__ == '__main__':
             # Deployment Year - integer, 2021<X
             text = values['-DEPLOY-YEAR-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(num >= DYLowerBound)
                 window['-DEPLOY-YEAR-'].update(background_color='#ffffff')
@@ -659,9 +660,10 @@ if __name__ == '__main__':
             # Contract Term - integer, 5<X<=20
             text = values['-CONTRACT-TERM-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(CTLowerBound <= num <= CTUpperBound)
-                window['-CONTRACT-TERM-'].update(background_color='#ffffff')
+                window['-CONTRACT-TERM-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-CONTRACT-TERM-'].update(background_color='red')
                 someError = True
@@ -669,9 +671,10 @@ if __name__ == '__main__':
             # Annual Budget Total - integer, 0<X
             text = values['-ANNUAL-BUDGET-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 < num)
-                window['-ANNUAL-BUDGET-'].update(background_color='#ffffff')
+                window['-ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-ANNUAL-BUDGET-'].update(background_color='red')
                 someError = True
@@ -679,6 +682,7 @@ if __name__ == '__main__':
             # Budget Salary Cost Percentage - float, 0<=X<=1
             text = values['-BUDGET-SALARY-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
                 window['-BUDGET-SALARY-'].update(background_color='#ffffff')
@@ -689,6 +693,7 @@ if __name__ == '__main__':
             # Budget Capital Cost Percentage - float, 0<=X<=1
             text = values['-BUDGET-CAPITAL-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
                 window['-BUDGET-CAPITAL-'].update(background_color='#ffffff')
@@ -699,6 +704,7 @@ if __name__ == '__main__':
             # Budget Operating Cost Percentage - float, 0<=X<=1
             text = values['-BUDGET-OPERATING-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
                 window['-BUDGET-OPERATING-'].update(background_color='#ffffff')
@@ -709,9 +715,10 @@ if __name__ == '__main__':
             # Total Fleet Size - integer, 0<X
             text = values['-FLEET-SIZE-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 < num)
-                window['-FLEET-SIZE-'].update(background_color='#ffffff')
+                window['-FLEET-SIZE-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-FLEET-SIZE-'].update(background_color='red')
                 someError = True
@@ -719,9 +726,10 @@ if __name__ == '__main__':
             # Annual Mileage - integer, 0<=X
             text = values['-ANNUAL-MILES-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-ANNUAL-MILES-'].update(background_color='#ffffff')
+                window['-ANNUAL-MILES-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-ANNUAL-MILES-'].update(background_color='red')
                 someError = True
@@ -729,9 +737,10 @@ if __name__ == '__main__':
             # Weighted MPG - float, 0<X
             text = values['-WEIGHTED-MPG-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 < num)
-                window['-WEIGHTED-MPG-'].update(background_color='#ffffff')
+                window['-WEIGHTED-MPG-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-WEIGHTED-MPG-'].update(background_color='red')
                 someError = True
@@ -739,9 +748,10 @@ if __name__ == '__main__':
             # Fuel Price - float, 0<=X
             text = values['-FUEL-PRICE-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num)
-                window['-FUEL-PRICE-'].update(background_color='#ffffff')
+                window['-FUEL-PRICE-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-FUEL-PRICE-'].update(background_color='red')
                 someError = True
@@ -749,9 +759,10 @@ if __name__ == '__main__':
             # Maintenance and Repairs Year 1 Cost - integer, 0<=X
             text = values['-MR-COST-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-MR-COST-'].update(background_color='#ffffff')
+                window['-MR-COST-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-MR-COST-'].update(background_color='red')
                 someError = True
@@ -759,9 +770,10 @@ if __name__ == '__main__':
             # Diesel Bus Total Price - integer, 0<=X
             text = values['-DIESEL-PRICE-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-DIESEL-PRICE-'].update(background_color='#ffffff')
+                window['-DIESEL-PRICE-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-DIESEL-PRICE-'].update(background_color='red')
                 someError = True
@@ -769,6 +781,7 @@ if __name__ == '__main__':
             # Diesel Finance Rate - float, 0<=X<=1
             text = values['-DIESEL-RATE-']
             try:
+                text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
                 window['-DIESEL-RATE-'].update(background_color='#ffffff')
@@ -779,9 +792,10 @@ if __name__ == '__main__':
             # Diesel Finance Term - integer, 0<=X
             text = values['-DIESEL-TERM-']
             try:
+                text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-DIESEL-TERM-'].update(background_color='#ffffff')
+                window['-DIESEL-TERM-'].update(f"{num:,}", background_color='#ffffff')
             except:
                 window['-DIESEL-TERM-'].update(background_color='red')
                 someError = True
@@ -791,20 +805,20 @@ if __name__ == '__main__':
 
             # Get the user input information
             userInputs = []
-            userInputs.append(int(values['-DEPLOY-YEAR-']))
-            userInputs.append(int(values['-CONTRACT-TERM-']))
-            userInputs.append(int(values['-ANNUAL-BUDGET-']))
-            userInputs.append(float(values['-BUDGET-SALARY-']))
-            userInputs.append(float(values['-BUDGET-CAPITAL-']))
-            userInputs.append(float(values['-BUDGET-OPERATING-']))
-            userInputs.append(int(values['-FLEET-SIZE-']))
-            userInputs.append(int(values['-ANNUAL-MILES-']))
-            userInputs.append(int(values['-WEIGHTED-MPG-']))
-            userInputs.append(float(values['-FUEL-PRICE-']))
-            userInputs.append(int(values['-MR-COST-']))
-            userInputs.append(int(values['-DIESEL-PRICE-']))
-            userInputs.append(float(values['-DIESEL-RATE-']))
-            userInputs.append(int(values['-DIESEL-TERM-']))
+            userInputs.append(int(values['-DEPLOY-YEAR-'].replace(',','')))
+            userInputs.append(int(values['-CONTRACT-TERM-'].replace(',','')))
+            userInputs.append(int(values['-ANNUAL-BUDGET-'].replace(',','')))
+            userInputs.append(float(values['-BUDGET-SALARY-'].replace(',','')))
+            userInputs.append(float(values['-BUDGET-CAPITAL-'].replace(',','')))
+            userInputs.append(float(values['-BUDGET-OPERATING-'].replace(',','')))
+            userInputs.append(int(values['-FLEET-SIZE-'].replace(',','')))
+            userInputs.append(int(values['-ANNUAL-MILES-'].replace(',','')))
+            userInputs.append(float(values['-WEIGHTED-MPG-'].replace(',','')))
+            userInputs.append(float(values['-FUEL-PRICE-'].replace(',','')))
+            userInputs.append(int(values['-MR-COST-'].replace(',','')))
+            userInputs.append(int(values['-DIESEL-PRICE-'].replace(',','')))
+            userInputs.append(float(values['-DIESEL-RATE-'].replace(',','')))
+            userInputs.append(int(values['-DIESEL-TERM-'].replace(',','')))
 
             # Update Previous Inputs file
             with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
@@ -830,19 +844,19 @@ if __name__ == '__main__':
 
             # Update User Window
             window['-DEPLOY-YEAR-'].update(newInputs[0])
-            window['-CONTRACT-TERM-'].update(newInputs[1])
-            window['-ANNUAL-BUDGET-'].update(newInputs[2])
+            window['-CONTRACT-TERM-'].update(f"{int(newInputs[1]):,}")
+            window['-ANNUAL-BUDGET-'].update(f"{int(newInputs[2]):,}")
             window['-BUDGET-SALARY-'].update(newInputs[3])
             window['-BUDGET-CAPITAL-'].update(newInputs[4])
             window['-BUDGET-OPERATING-'].update(newInputs[5])
-            window['-FLEET-SIZE-'].update(newInputs[6])
-            window['-ANNUAL-MILES-'].update(newInputs[7])
-            window['-WEIGHTED-MPG-'].update(newInputs[8])
-            window['-FUEL-PRICE-'].update(newInputs[9])
-            window['-MR-COST-'].update(newInputs[10])
-            window['-DIESEL-PRICE-'].update(newInputs[11])
+            window['-FLEET-SIZE-'].update(f"{int(newInputs[6]):,}")
+            window['-ANNUAL-MILES-'].update(f"{int(newInputs[7]):,}")
+            window['-WEIGHTED-MPG-'].update(f"{float(newInputs[8]):,}")
+            window['-FUEL-PRICE-'].update(f"{float(newInputs[9]):,}")
+            window['-MR-COST-'].update(f"{int(newInputs[10]):,}")
+            window['-DIESEL-PRICE-'].update(f"{int(newInputs[11]):,}")
             window['-DIESEL-RATE-'].update(newInputs[12])
-            window['-DIESEL-TERM-'].update(newInputs[13])
+            window['-DIESEL-TERM-'].update(f"{int(newInputs[13]):,}")
 
             # Write to previous Inputs
             with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
