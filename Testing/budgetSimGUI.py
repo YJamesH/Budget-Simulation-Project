@@ -22,7 +22,6 @@ import pandas as pd
 # For Image Saving
 from PIL import ImageGrab
 
-
 def create_budget_graphs(inputs):
 
     # --------------------------------------------------- #
@@ -91,7 +90,6 @@ def create_budget_graphs(inputs):
     MREsc1 = excelVars.iat[4,0]                 # M&R escalator in first half-life
     MREsc2 = excelVars.iat[5,0]                 # M&R escalator in second half-life
 
-
     # Highland Contract
     annualDeployed = [0]
     annualContract = [0]
@@ -104,7 +102,6 @@ def create_budget_graphs(inputs):
     # Highland Contract Total Price per Year Cumulative
 
     contractYearPrice = [0]*21
-
     for simDepYear in range(21):
         CYPPrice = annualDeployed[simDepYear] * annualContract[simDepYear]
         for simAddYear in range(simDepYear, simDepYear+contractTerm):
@@ -115,36 +112,36 @@ def create_budget_graphs(inputs):
 
     # --------------------------------------------------- #
 
-    # Statistics summary
-    print("\n Summary ")
-    print("Deployment Year              ", deploymentYear)
-    print("Contract Term                ", deploymentYear)
-    print("Annual Budget                ", annualBudget)
-    print("Annual Budget Salary         ", annualBudgetSal)
-    print("Annual Budget Capital        ", annualBudgetCap)
-    print("Annual Budget Operating      ", annualBudgetOp)
+    # # Statistics summary
+    # print("\n Summary ")
+    # print("Deployment Year              ", deploymentYear)
+    # print("Contract Term                ", deploymentYear)
+    # print("Annual Budget                ", annualBudget)
+    # print("Annual Budget Salary         ", annualBudgetSal)
+    # print("Annual Budget Capital        ", annualBudgetCap)
+    # print("Annual Budget Operating      ", annualBudgetOp)
 
-    print("Total Fleet Size is          ", fleetSize)
-    print("Annual mileage with gas is   ", annualMiles)
-    print("Gas Bus MPG is               ", weightedMPG)
-    print("Fuel Price per Gallon        ", fuelPriceGal)
-    print("Maintenance & Repair Cost    ", MRCost)
+    # print("Total Fleet Size is          ", fleetSize)
+    # print("Annual mileage with gas is   ", annualMiles)
+    # print("Gas Bus MPG is               ", weightedMPG)
+    # print("Fuel Price per Gallon        ", fuelPriceGal)
+    # print("Maintenance & Repair Cost    ", MRCost)
 
-    print("Diesel Bus Purchase Price is ", dieselPrice)
-    print("Diesel Bus Financing Rate is ", dieselRate)
-    print("Diesel Bus Financing Term is ", dieselTerm)
+    # print("Diesel Bus Purchase Price is ", dieselPrice)
+    # print("Diesel Bus Financing Rate is ", dieselRate)
+    # print("Diesel Bus Financing Term is ", dieselTerm)
 
-    print("\n ")
-    print("Contract Bus Escalator       ", contractEsc)
-    print("Diesel Bus Escalator         ", dieselPriceEsc)
-    print("Overhead Allocation Cost     ", overheadAllocation)
-    print("Other Costs Escaltor         ", costEsc)
-    print("M&R first half-life          ", MREsc1)
-    print("M&R second half-life         ", MREsc2)
+    # print("\n ")
+    # print("Contract Bus Escalator       ", contractEsc)
+    # print("Diesel Bus Escalator         ", dieselPriceEsc)
+    # print("Overhead Allocation Cost     ", overheadAllocation)
+    # print("Other Costs Escaltor         ", costEsc)
+    # print("M&R first half-life          ", MREsc1)
+    # print("M&R second half-life         ", MREsc2)
 
-    print("Annual Deploy", annualDeployed)
-    print("Annual Contract Price", annualContract)
-    print("Contract Year Price", contractYearPrice, "\n")
+    # print("Annual Deploy", annualDeployed)
+    # print("Annual Contract Price", annualContract)
+    # print("Contract Year Price", contractYearPrice, "\n")
 
 
     # --------------------------------------------------- #
@@ -179,11 +176,11 @@ def create_budget_graphs(inputs):
     for i in range(contractTerm):
         overheadTCO.append(int((mrTCO[i]+fuelTCO[i])*overheadAllocation))
 
-    # Prints
-    print("TCO", purchaseTCO)
-    print("TCO", mrTCO)
-    print("TCO", fuelTCO)
-    print("TCO", overheadTCO, "\n")
+    # # Prints
+    # print("TCO", purchaseTCO)
+    # print("TCO", mrTCO)
+    # print("TCO", fuelTCO)
+    # print("TCO", overheadTCO, "\n")
 
     # --------------------------------------------------- #
     # Diesel Costs avoided  - Break down
@@ -201,6 +198,7 @@ def create_budget_graphs(inputs):
             if (simDepYear+simAddYear) < (contractTerm):
                 purchaseDCA[simDepYear+simAddYear] = purchaseDCA[simDepYear+simAddYear] + simCost
     purchaseDCA.insert(0,0)
+
 
     # M&R costs avoided
     for simDepYear in range(contractTerm):
@@ -228,16 +226,17 @@ def create_budget_graphs(inputs):
             yearlyFuel = yearlyFuel * (1+costEsc)
     fuelDCA.insert(0,0)
 
+
     # Overhead costs avoided
     for simDepYear in range(contractTerm):
         overheadDCA.append(int(overheadAllocation*(fuelDCA[simDepYear] + mrDCA[simDepYear])))
     overheadDCA.insert(0,0)
 
-    # Prints
-    print("DCA", purchaseDCA)
-    print("DCA", mrDCA)
-    print("DCA", fuelDCA)
-    print("DCA", overheadDCA, "\n")
+    # # Prints
+    # print("DCA", purchaseDCA)
+    # print("DCA", mrDCA)
+    # print("DCA", fuelDCA)
+    # print("DCA", overheadDCA, "\n")
 
     # --------------------------------------------------- #
     # Relative Budget Neutrality
@@ -248,29 +247,28 @@ def create_budget_graphs(inputs):
         totalDCA.append(purchaseDCA[i] + mrDCA[i] + fuelDCA[i] + overheadDCA[i])
 
     ### Budget Difference ###
-    budgetStaQuo = []
+    budgetStaQuo = []               # Current Budget is continues on
     for simDepYear in range(contractTerm+1):
         budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
 
-    budgetDiffRBN = []
-    for i in range(contractTerm+1):
+    budgetDiffRBN = []              # Budget Difference (Diesel costs avoided - Highland Contract)
+    for i in range(contractTerm+1): 
         tempSub = totalDCA[i]-contractYearPrice[i]
+        if tempSub<0:
+            tempSub=0
         budgetDiffRBN.append(tempSub)
 
     ### Total Budget With Highland ###
-    finalRBudget = []
+    finalRBudget = []               # Relative Budget -> subtract Diesel costs and add Highland Contract
     for simDepYear in range(contractTerm+1):
         tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
-        if tempSub<0:
-            tempSub=0
         finalRBudget.append(tempSub)
 
-    # Prints
-    print("Total DCA", totalDCA)
-    print("Budget Diff RBN", budgetDiffRBN)
-
-    print("Budget Status Quo", budgetStaQuo)
-    print("Final Relative Budget", finalRBudget, "\n")
+    # # Prints
+    # print("Total DCA", totalDCA, "\n")
+    # print("Budget Status Quo", budgetStaQuo)
+    # print("Final Relative Budget", finalRBudget)
+    # print("Budget Diff RBN", budgetDiffRBN, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -283,11 +281,11 @@ def create_budget_graphs(inputs):
         evCostReduction.append(tempPerc)
 
     ## Starts one year before deploy (i.e. 2022) ##
-    buOperatingSQ = []
+    buOperatingSQ = []                  # Operating Cost per bus per year (increasing constant)
     for simDepYear in range(contractTerm+1):      
         buOperatingSQ.append(int(annualBudgetOp * pow(1+costEsc, simDepYear))) 
 
-    buOperatingCosts = []
+    buOperatingCosts = []               # Operating Costs total (with # of buses)
     buOperatingCosts.append(buOperatingSQ[0])
     for simDepYear in range(contractTerm+1):   
         tempOpCost = int(buOperatingSQ[simDepYear] * (1-evCostReduction[simDepYear]))
@@ -295,7 +293,7 @@ def create_budget_graphs(inputs):
             tempOpCost = 0
         buOperatingCosts.append(tempOpCost)
 
-    buPersonnelCosts = []
+    buPersonnelCosts = []               # Personnel Costs (increasing constant)
     for simDepYear in range(contractTerm+1):   
         buPersonnelCosts.append(int(annualBudgetSal * pow(1+costEsc, simDepYear)))
 
@@ -309,14 +307,11 @@ def create_budget_graphs(inputs):
         buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
 
+    # # Prints
     # print("Bottom-up Operating Status Quo", buOperatingSQ)
     # print("Bottom-up Operating Costs", buOperatingCosts)
     # print("Bottom-up Personnel Costs", buPersonnelCosts)
-
     # print("Bottom-up Total", buTotalPrice, "\n")
-
-
-
 
     # --------------------------------------------------- #
     # Carbon Reduction
@@ -340,6 +335,7 @@ def create_budget_graphs(inputs):
     for i in range(1,contractTerm+1):
         cumulCarbonReduced.append(round(annualCarbonReduced[i]+cumulCarbonReduced[i-1],1))
 
+    # # Prints
     # print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
 
     # --------------------------------------------------- #
@@ -503,7 +499,6 @@ def create_budget_graphs(inputs):
     plt.title('Short Term Bottom Up Analysis')
 
 
-
     # Plot configuration
     fig.set_figheight(6)
     fig.set_figwidth(11)
@@ -515,8 +510,6 @@ def create_budget_graphs(inputs):
     axes[1,0].set_facecolor('#fffeea')
     axes[1,1].set_facecolor('#fffeea')
 
-
-    # fig.tight_layout()
     return plt.gcf()
 
 def create_empty_graph():
@@ -530,6 +523,7 @@ def create_empty_graph():
     axes[1,0].set_facecolor('#fffeea')
     axes[1,1].set_facecolor('#fffeea')
 
+    # Defined size
     fig.set_figheight(6)
     fig.set_figwidth(11)
     return plt.gcf()
@@ -553,6 +547,8 @@ if __name__ == '__main__':
     # #f0bf4c                      bus yellow
     # #fdbd1c                      button yellow
     # #3d4043                      dark gray (text)
+    # #409de7                      Dark Blue
+    # #8dc7f6                      Light Blue
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
@@ -570,6 +566,8 @@ if __name__ == '__main__':
             for input in line.split():
                 savedInputs.append(input)
 
+    # --------------------------------------------------- #
+    # FORMATTING #
     layoutCol1TopRow = [
         [sg.P(background_color='#409de7'), 
         sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
@@ -662,7 +660,9 @@ if __name__ == '__main__':
     # put everything in a col so it can be saved
     layout = [[sg.Column(layoutTotal, key='-SAVE-THIS-', pad=((0,0),(0,0)))]]
 
+    # --------------------------------------------------- #
 
+    # PySimpleGUI GUI Create
     def draw_figure(canvas, figure):
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
@@ -678,7 +678,6 @@ if __name__ == '__main__':
     # Start with Empty Graph
     curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
     
-
     while (True):
         event, values = window.read()
         
@@ -686,9 +685,10 @@ if __name__ == '__main__':
             break
         if event=="Plot!":
             
-            # User Error Checking
+            # --------------------------------------------------- #
+            # User Error Check
             someError = False
-
+            
             # Grab bounds for Deploy Year and Contract Term
             excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=9, nrows=3)
             DYLowerBound = excelBounds.iat[0,0]
@@ -851,6 +851,7 @@ if __name__ == '__main__':
 
             if someError:
                 continue
+            # --------------------------------------------------- #
 
             # Get the user input information
             userInputs = []
@@ -880,7 +881,10 @@ if __name__ == '__main__':
             tempGraph = create_budget_graphs(userInputs)
             # tempGraph.subplots_adjust(right=1.2)
 
+            # Only able to save when there is graph on screen
             window['-SAVEASBUTTON-'].update(disabled=False)
+
+            # Draw the graphs created
             curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
 
         if event=="Reset Inputs":
@@ -913,10 +917,10 @@ if __name__ == '__main__':
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
+        # Save Screen of GUI as PNG, JPG, etc.
         if event=='-SAVE-AS-':
             savePath = values['-SAVE-AS-']
             print(savePath)
-
             saveAsFile(window['-SAVE-THIS-'], savePath)
 
 
