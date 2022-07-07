@@ -19,6 +19,9 @@ matplotlib.use('TkAgg')
 from kiwisolver import Expression
 import pandas as pd
 
+# For Image Saving
+from PIL import ImageGrab
+
 
 def create_budget_graphs(inputs):
 
@@ -77,17 +80,16 @@ def create_budget_graphs(inputs):
     # Admin Inputs   **Read from excel sheet "Budget Simulation - Admin.xlsx"
     
     # Read from excel sheet
-    excelVars = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=2, nrows=7)
+    excelVars = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=2, nrows=6)
     excelContract = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "I,J", header=3, nrows=20)
 
     # Admin Variables
-    contractPrice = excelVars.iat[0,0]          # 30k bus/year
-    contractEsc = excelVars.iat[1,0]            # 3%/year
-    dieselPriceEsc = excelVars.iat[2,0]         # Diesel Price escalator 5%
-    overheadAllocation = excelVars.iat[3,0]     # Overhead Cost Allocation 15%
-    costEsc = excelVars.iat[4,0]                # Other costs escalator (M&R, fuel, overhead,...)
-    MREsc1 = excelVars.iat[5,0]                 # M&R escalator in first half-life
-    MREsc2 = excelVars.iat[6,0]                 # M&R escalator in second half-life
+    contractEsc = excelVars.iat[0,0]            # 3%/year
+    dieselPriceEsc = excelVars.iat[1,0]         # Diesel Price escalator 5%
+    overheadAllocation = excelVars.iat[2,0]     # Overhead Cost Allocation 15%
+    costEsc = excelVars.iat[3,0]                # Other costs escalator (M&R, fuel, overhead,...)
+    MREsc1 = excelVars.iat[4,0]                 # M&R escalator in first half-life
+    MREsc2 = excelVars.iat[5,0]                 # M&R escalator in second half-life
 
 
     # Highland Contract
@@ -133,7 +135,6 @@ def create_budget_graphs(inputs):
     print("Diesel Bus Financing Term is ", dieselTerm)
 
     print("\n ")
-    print("Contract Bus Price/Year      ", contractPrice)
     print("Contract Bus Escalator       ", contractEsc)
     print("Diesel Bus Escalator         ", dieselPriceEsc)
     print("Overhead Allocation Cost     ", overheadAllocation)
@@ -344,14 +345,16 @@ def create_budget_graphs(inputs):
     # --------------------------------------------------- #
     # Graphs and Plots
 
-    fig, axes = plt.subplots(nrows = 2, ncols = 2)
+    # Create subplots, adjust size
+    fig, axes = plt.subplots(nrows=2, ncols=2) #, gridspec_kw={'width_ratios': [10,9]}
+    plt.subplots_adjust(left=.07, bottom=.1, right=.84, top=.93, wspace=.85, hspace=.4)
 
+    # All X Axis 
     yearsWDep = []
     for years in range(deploymentYear-1, deploymentYear+contractTerm):
         yearsWDep.append(years)
 
-
-    # X Axis Formatting
+    # X Axis for graphs Formatting
     def xAxisCalculator(term, xAxisTemp):
         if term == 5:
             for i in range(5):
@@ -361,10 +364,6 @@ def create_budget_graphs(inputs):
             for i in range(divTemp):
                 xAxisTemp.append(xAxisTemp[-1]+2)
             xAxisTemp.append(xAxisTemp[0]+term)
-        # elif term>=12 and term<=14:
-        #     for i in range(3):
-        #         xAxisTemp.append(xAxisTemp[-1]+3)
-        #     xAxisTemp.append(xAxisTemp[0]+term)
         else:
             xCalcDiv = math.floor(term/5)
             xCalcMod = (term)%5
@@ -372,10 +371,7 @@ def create_budget_graphs(inputs):
                 xAxisTemp.append(xAxisTemp[-1]+xCalcDiv)
             for i in range(xCalcMod):
                 xAxisTemp.append(xAxisTemp[-1]+(xCalcDiv+1))
-
         return xAxisTemp
-
-
     xAxisShown = [deploymentYear-1]
     xAxisShown = xAxisCalculator(contractTerm, xAxisShown)
 
@@ -403,7 +399,8 @@ def create_budget_graphs(inputs):
     plt.yticks(np.arange(0, Fig1YMax, round(Fig1YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
-    # plt.legend(["Budget Status Quo", "Budget with Highland", "Budget saved"], loc='lower right')
+    plt.legend(["Current Budget", "Budget w/ Highland", "Savings"], 
+                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Budget Neutral Transition')
 
 
@@ -438,13 +435,14 @@ def create_budget_graphs(inputs):
     plt.yticks(np.arange(0, Fig2YMax, round(Fig2YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
-    # plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract", "Budget Capital Cost"], bbox_to_anchor=(1, 1))
+    plt.legend(["Current Budget", "Operating Cost", "Personnel Cost", "Highland Contract", "Capital Cost"], 
+                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Bottom Up Analysis')
 
 
     # Figure 3 - Carbon Reduction Line Graph 
     plt.sca(axes[1,0])
-    plt.plot(yearsWDep, cumulCarbonReduced[0:contractTerm+1], 'r', label='Expected Carbon Reduction')
+    plt.plot(yearsWDep, cumulCarbonReduced[0:contractTerm+1], 'r', label='Carbon Reduced')
 
     # Figure 3 Y Max
     Fig3YMax = round((cumulCarbonReduced[contractTerm]+10000), -4)
@@ -456,14 +454,11 @@ def create_budget_graphs(inputs):
     plt.yticks(np.arange(0, Fig3YMax, Fig3YMax/5))
     plt.ylabel('Metric Tons (Thousand)')
     plt.xlabel('Year')
-    # plt.legend(loc='upper left')
-    plt.title('Cumulative CO2 (M.Ton) Reduced')
+    plt.legend(bbox_to_anchor=(1.54, 1), fontsize=9, shadow=True, facecolor='#fffef8')
+    plt.title('Cumulative CO2 Reduced')
 
 
     # Figure 4 - Short Term Bottom Up analysis
-    fiveYearSim = []
-    for i in range(-1,5):
-        fiveYearSim.append(deploymentYear+i)
     plt.sca(axes[1,1])
 
     fiveBudgetStaQuo = []
@@ -475,16 +470,16 @@ def create_budget_graphs(inputs):
         fiveBuOperatingCosts.append(buOperatingCosts[i])
         fiveBuPersonnelCosts.append(buPersonnelCosts[i])
         fiveCYPFormat.append(CYPFormat[i])
-    # Insert data into bar graph
-    plt.plot(fiveYearSim, fiveBudgetStaQuo, 'r', label='Budget SQ')
-    plt.bar(fiveYearSim, fiveBuOperatingCosts, color='m',)
-    plt.bar(fiveYearSim, fiveBuPersonnelCosts, bottom=fiveBuOperatingCosts, color='b')
+    # Insert data into graph
+    plt.plot(xAxisFig4, fiveBudgetStaQuo, 'r', label='Budget SQ')
+    plt.bar(xAxisFig4, fiveBuOperatingCosts, color='m',)
+    plt.bar(xAxisFig4, fiveBuPersonnelCosts, bottom=fiveBuOperatingCosts, color='b')
 
     # Since operating costs and personnel costs are not arrays, need to combine lists
     fiveOpPerSum = []
     for i in range(6):
         fiveOpPerSum.append(fiveBuOperatingCosts[i]+fiveBuPersonnelCosts[i])    
-    plt.bar(fiveYearSim, fiveCYPFormat, bottom=fiveOpPerSum, color='c')
+    plt.bar(xAxisFig4, fiveCYPFormat, bottom=fiveOpPerSum, color='c')
     plt.bar(deploymentYear-1, annualBudgetCap, bottom=CYPFormat[0]+buOperatingCosts[0]+buPersonnelCosts[0], color='k')
 
     # Figure 4 Y max
@@ -503,13 +498,15 @@ def create_budget_graphs(inputs):
     plt.yticks(np.arange(0, Fig4YMax, round(Fig4YMax+50000000,-8)/10))
     plt.ylabel('Millions')
     plt.xlabel('Year')
-    # plt.legend(["Budget Status Quo", "Operating Costs", "Personnel Costs", "Highland Contract"], bbox_to_anchor=(1, 1))
+    plt.legend(["Current Budget", "Operating Cost", "Personnel Cost", "Highland Contract", "Capital Cost"], 
+                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Short Term Bottom Up Analysis')
 
+
+
     # Plot configuration
-    fig.tight_layout()
     fig.set_figheight(6)
-    fig.set_figwidth(8)
+    fig.set_figwidth(11)
 
     # background color
     fig.set_facecolor('#fffeea')
@@ -518,11 +515,14 @@ def create_budget_graphs(inputs):
     axes[1,0].set_facecolor('#fffeea')
     axes[1,1].set_facecolor('#fffeea')
 
+
+    # fig.tight_layout()
     return plt.gcf()
 
 def create_empty_graph():
     fig, axes = plt.subplots(nrows = 2, ncols = 2)
-    
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+
     # background color
     fig.set_facecolor('#fffeea')
     axes[0,0].set_facecolor('#fffeea')
@@ -531,33 +531,36 @@ def create_empty_graph():
     axes[1,1].set_facecolor('#fffeea')
 
     fig.set_figheight(6)
-    fig.set_figwidth(8)
+    fig.set_figwidth(11)
     return plt.gcf()
 
 def delete_prev_graph(curr_fig):
     curr_fig.get_tk_widget().forget()
     plt.close('all')
 
+def saveAsFile(element, filename):
+    widget = element.Widget
+    box = (widget.winfo_rootx(), widget.winfo_rooty(), widget.winfo_rootx() + widget.winfo_width(), widget.winfo_rooty() + widget.winfo_height())
+    grab = ImageGrab.grab(bbox=box)
+    grab.save(filename)
+
 if __name__ == '__main__':
 
-    # Window Colors and background  
-    # #fffeea                         tan yellow
-    # #338165                         green
-    # #3d4043                         gray
-    # #f0bf4c                         bus yellow
-    # #fdbd1c                         button yellow
+    # Window Colors and background 
+    # #b9b9b9                      light gray (background)                     
+    # #fffeea                      tan yellow
+    # #338165                      green
+    # #f0bf4c                      bus yellow
+    # #fdbd1c                      button yellow
+    # #3d4043                      dark gray (text)
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
     sg.theme_button_color(color = ('#3d4043', '#fdbd1c'))          # button text, button background
-    sg.theme_input_background_color(color='#ffffff')
+    sg.theme_input_background_color(color='#fffef3')
     sg.theme_input_text_color(color='#3d4043')
     sg.theme_text_color(color='#3d4043')    
     sg.theme_text_element_background_color(color='#fffeea')
-
-    # sg.theme_element_background_color(color='#6a0dad')   
-    # sg.theme_element_text_color(color='#6a0dad')
-
 
 
     # Get last inputted -- file is formatted in same order as displayed inputs
@@ -567,11 +570,23 @@ if __name__ == '__main__':
             for input in line.split():
                 savedInputs.append(input)
 
+    layoutCol1TopRow = [
+        [sg.P(background_color='#409de7'), 
+        sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
+        sg.P(background_color='#409de7')]
+    ]
+
+    layoutCol1BotRow = [
+        [sg.P(background_color='#338165'), 
+        sg.B('Plot!', font='_ 16 bold', pad=((0,6),(6,6))), 
+        sg.B('Reset Inputs', font='_ 16 bold', pad=((0,6),(6,6)))
+        ]
+    ]
+
     layoutCol1 = [
-        # [sg.T('', background_color='#fffeea')],
-        [sg.VP()],
+        [sg.Column(layoutCol1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 0))],
+                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 20))],
         [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
@@ -599,33 +614,53 @@ if __name__ == '__main__':
         [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.VP()],
-        [sg.P(), 
-                    sg.B('Plot!', font='_ 16 bold'), 
-                    sg.B('Reset Inputs', font='_ 16 bold'), 
-                    sg.B('Save', font='_ 16 bold', disabled=True)
+        [sg.Column(layoutCol1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
+    ]
+
+    layoutCol2TopRow = [
+        [sg.P(background_color='#8dc7f6'), 
+        sg.T('Graphs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.P(background_color='#8dc7f6')]
+    ]
+
+    layoutCol2BotRow = [
+        [sg.P(background_color='#338165'), 
+            sg.Input(key='-SAVE-AS-', visible=False, enable_events=True), 
+            sg.FileSaveAs(key='-SAVEASBUTTON-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
+                          font='_ 16 bold', pad=((0,6),(6,6)), disabled=True)
         ]
     ]
-    
+
     layoutCol2 = [
-        [sg.Canvas(key='canvas')]
+        [sg.Column(layoutCol2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+        [sg.Canvas(key='canvas')],
+        [sg.Column(layoutCol2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
     ]
+
+    # Image to display
+    img_logo = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
 
     layoutTopRow = [    
-        [sg.P(background_color='#338165'), 
+        [
+            img_logo,
+            sg.P(background_color='#338165'), 
             sg.T('Highland Fleets Budget Simulation', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
-        sg.P(background_color='#338165')]
+            sg.P(background_color='#338165'),
+        ]
     ]
 
-    layout = [
-        [sg.Column(layoutTopRow, expand_x=True, pad=((0,0),(0,0)), background_color='#338165')],
-        [sg.VP()], 
-            [sg.P(), 
-                sg.Column(layoutCol1, key='-COLUMN-ONE-', expand_y=True, expand_x=True, background_color='#fffeea'),
-                sg.Column(layoutCol2, key = '-COLUMN-TWO-', expand_y=True, expand_x=True, background_color='#fffeea'), 
-            sg.P()
-            ],
-        [sg.VP()]
+    layoutTotal = [
+        [sg.Column(layoutTopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+        [sg.VP(background_color='#b9b9b9')], 
+            [sg.P(background_color='#b9b9b9'), 
+                sg.Column(layoutCol1, key='-COLUMN-ONE-', expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
+                sg.Column(layoutCol2, key = '-COLUMN-TWO-', expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
+            sg.P(background_color='#b9b9b9')],
+        [sg.VP(background_color='#b9b9b9')]
     ]
+
+    # put everything in a col so it can be saved
+    layout = [[sg.Column(layoutTotal, key='-SAVE-THIS-', pad=((0,0),(0,0)))]]
 
 
     def draw_figure(canvas, figure):
@@ -634,33 +669,19 @@ if __name__ == '__main__':
         figure_canvas_agg.get_tk_widget().pack(fill='both', expand=1, side='right')
         return figure_canvas_agg
 
-
-
-    window = sg.Window('Budget Simulation', layout, element_justification='right', finalize=True, margins=(0,0))
+    window = sg.Window('Budget Simulation', layout, element_justification='right', 
+                        finalize=True, margins=(0,0), grab_anywhere=True, relative_location=(-250, 25))
 
     # Set minimum window resizable size
     window.TKroot.minsize(1250, 650)
 
-    # Keep track of window size
-    window.bind('<Configure>',"Event")
-
-
+    # Start with Empty Graph
     curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
     
 
     while (True):
         event, values = window.read()
-
-        # Mouse over options
-        # mouse = values['-MOUSE-']
-        # if event == '-MOUSE-':
-        #     if mouse == (None, None):
-        #         print("I CLICKED!!!")
-
-        # Resizable graph and inputs based on window size?
-        # if event == "Event":
-        #     print(window.size)
-
+        
         if event == sg.WINDOW_CLOSED:
             break
         if event=="Plot!":
@@ -680,7 +701,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(num >= DYLowerBound)
-                window['-DEPLOY-YEAR-'].update(background_color='#ffffff')
+                window['-DEPLOY-YEAR-'].update(background_color='#fffef3')
             except:
                 window['-DEPLOY-YEAR-'].update(background_color='red')
                 someError = True
@@ -691,7 +712,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(CTLowerBound <= num <= CTUpperBound)
-                window['-CONTRACT-TERM-'].update(f"{num:,}", background_color='#ffffff')
+                window['-CONTRACT-TERM-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-CONTRACT-TERM-'].update(background_color='red')
                 someError = True
@@ -702,7 +723,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 < num)
-                window['-ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#ffffff')
+                window['-ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-ANNUAL-BUDGET-'].update(background_color='red')
                 someError = True
@@ -713,7 +734,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
-                window['-BUDGET-SALARY-'].update(background_color='#ffffff')
+                window['-BUDGET-SALARY-'].update(background_color='#fffef3')
             except:
                 window['-BUDGET-SALARY-'].update(background_color='red')
                 someError = True
@@ -724,7 +745,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
-                window['-BUDGET-CAPITAL-'].update(background_color='#ffffff')
+                window['-BUDGET-CAPITAL-'].update(background_color='#fffef3')
             except:
                 window['-BUDGET-CAPITAL-'].update(background_color='red')
                 someError = True
@@ -735,7 +756,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
-                window['-BUDGET-OPERATING-'].update(background_color='#ffffff')
+                window['-BUDGET-OPERATING-'].update(background_color='#fffef3')
             except:
                 window['-BUDGET-OPERATING-'].update(background_color='red')
                 someError = True
@@ -746,7 +767,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 < num)
-                window['-FLEET-SIZE-'].update(f"{num:,}", background_color='#ffffff')
+                window['-FLEET-SIZE-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-FLEET-SIZE-'].update(background_color='red')
                 someError = True
@@ -757,7 +778,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-ANNUAL-MILES-'].update(f"{num:,}", background_color='#ffffff')
+                window['-ANNUAL-MILES-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-ANNUAL-MILES-'].update(background_color='red')
                 someError = True
@@ -768,7 +789,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 < num)
-                window['-WEIGHTED-MPG-'].update(f"{num:,}", background_color='#ffffff')
+                window['-WEIGHTED-MPG-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-WEIGHTED-MPG-'].update(background_color='red')
                 someError = True
@@ -779,7 +800,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num)
-                window['-FUEL-PRICE-'].update(f"{num:,}", background_color='#ffffff')
+                window['-FUEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-FUEL-PRICE-'].update(background_color='red')
                 someError = True
@@ -790,7 +811,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-MR-COST-'].update(f"{num:,}", background_color='#ffffff')
+                window['-MR-COST-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-MR-COST-'].update(background_color='red')
                 someError = True
@@ -801,7 +822,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-DIESEL-PRICE-'].update(f"{num:,}", background_color='#ffffff')
+                window['-DIESEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-DIESEL-PRICE-'].update(background_color='red')
                 someError = True
@@ -812,7 +833,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = float(text)
                 assert(0 <= num <= 1)
-                window['-DIESEL-RATE-'].update(background_color='#ffffff')
+                window['-DIESEL-RATE-'].update(background_color='#fffef3')
             except:
                 window['-DIESEL-RATE-'].update(background_color='red')
                 someError = True
@@ -823,7 +844,7 @@ if __name__ == '__main__':
                 text = text.replace(',','')
                 num = int(text)
                 assert(0 <= num)
-                window['-DIESEL-TERM-'].update(f"{num:,}", background_color='#ffffff')
+                window['-DIESEL-TERM-'].update(f"{num:,}", background_color='#fffef3')
             except:
                 window['-DIESEL-TERM-'].update(background_color='red')
                 someError = True
@@ -859,7 +880,7 @@ if __name__ == '__main__':
             tempGraph = create_budget_graphs(userInputs)
             # tempGraph.subplots_adjust(right=1.2)
 
-            window['Save'].update(disabled=False)
+            window['-SAVEASBUTTON-'].update(disabled=False)
             curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
 
         if event=="Reset Inputs":
@@ -892,7 +913,11 @@ if __name__ == '__main__':
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
-        if event=="Save":
-            pass
+        if event=='-SAVE-AS-':
+            savePath = values['-SAVE-AS-']
+            print(savePath)
+
+            saveAsFile(window['-SAVE-THIS-'], savePath)
+
 
     window.close()
