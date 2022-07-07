@@ -22,6 +22,12 @@ import pandas as pd
 # For Image Saving
 from PIL import ImageGrab
 
+# Custom Font importing
+import pyglet
+pyglet.font.add_file(r'.\Fonts\Font1.ttf')
+pyglet.font.add_file(r'.\Fonts\Font2.ttf')
+pyglet.font.add_file(r'.\Fonts\Font3.ttf')
+
 
 def create_budget_graphs(inputs):
 
@@ -255,22 +261,23 @@ def create_budget_graphs(inputs):
     budgetDiffRBN = []
     for i in range(contractTerm+1):
         tempSub = totalDCA[i]-contractYearPrice[i]
+        if tempSub<0:
+            tempSub=0
         budgetDiffRBN.append(tempSub)
 
     ### Total Budget With Highland ###
     finalRBudget = []
     for simDepYear in range(contractTerm+1):
         tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
-        if tempSub<0:
-            tempSub=0
         finalRBudget.append(tempSub)
 
     # Prints
-    print("Total DCA", totalDCA)
-    print("Budget Diff RBN", budgetDiffRBN)
+    print("Total DCA", totalDCA, "\n")
 
     print("Budget Status Quo", budgetStaQuo)
-    print("Final Relative Budget", finalRBudget, "\n")
+
+    print("Final Relative Budget", finalRBudget)
+    print("Budget Diff RBN", budgetDiffRBN, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -312,7 +319,6 @@ def create_budget_graphs(inputs):
     # print("Bottom-up Operating Status Quo", buOperatingSQ)
     # print("Bottom-up Operating Costs", buOperatingCosts)
     # print("Bottom-up Personnel Costs", buPersonnelCosts)
-
     # print("Bottom-up Total", buTotalPrice, "\n")
 
 
@@ -553,6 +559,8 @@ if __name__ == '__main__':
     # #f0bf4c                      bus yellow
     # #fdbd1c                      button yellow
     # #3d4043                      dark gray (text)
+    # #409de7                      Dark Blue
+    # #8dc7f6                      Light Blue
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
