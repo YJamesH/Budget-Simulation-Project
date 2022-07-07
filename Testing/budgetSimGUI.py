@@ -24,9 +24,9 @@ from PIL import ImageGrab
 
 # Custom Font importing
 import pyglet
-pyglet.font.add_file(r'./Fonts/Font1.ttf')
-pyglet.font.add_file(r'./Fonts/Font2.ttf')
-pyglet.font.add_file(r'./Fonts/Font3.ttf')
+pyglet.font.add_file(r'.\Fonts\Font1.ttf')
+pyglet.font.add_file(r'.\Fonts\Font2.ttf')
+pyglet.font.add_file(r'.\Fonts\Font3.ttf')
 
 
 def create_budget_graphs(inputs):
@@ -261,22 +261,23 @@ def create_budget_graphs(inputs):
     budgetDiffRBN = []
     for i in range(contractTerm+1):
         tempSub = totalDCA[i]-contractYearPrice[i]
+        if tempSub<0:
+            tempSub=0
         budgetDiffRBN.append(tempSub)
 
     ### Total Budget With Highland ###
     finalRBudget = []
     for simDepYear in range(contractTerm+1):
         tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
-        if tempSub<0:
-            tempSub=0
         finalRBudget.append(tempSub)
 
     # Prints
-    print("Total DCA", totalDCA)
-    print("Budget Diff RBN", budgetDiffRBN)
+    print("Total DCA", totalDCA, "\n")
 
     print("Budget Status Quo", budgetStaQuo)
-    print("Final Relative Budget", finalRBudget, "\n")
+
+    print("Final Relative Budget", finalRBudget)
+    print("Budget Diff RBN", budgetDiffRBN, "\n")
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -318,7 +319,6 @@ def create_budget_graphs(inputs):
     # print("Bottom-up Operating Status Quo", buOperatingSQ)
     # print("Bottom-up Operating Costs", buOperatingCosts)
     # print("Bottom-up Personnel Costs", buPersonnelCosts)
-
     # print("Bottom-up Total", buTotalPrice, "\n")
 
 
@@ -559,6 +559,8 @@ if __name__ == '__main__':
     # #f0bf4c                      bus yellow
     # #fdbd1c                      button yellow
     # #3d4043                      dark gray (text)
+    # #409de7                      Dark Blue
+    # #8dc7f6                      Light Blue
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
@@ -593,13 +595,13 @@ if __name__ == '__main__':
         [sg.Column(layoutCol1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 20))],
-        [sg.P(), sg.T('Contract Term (Y)', font='Font1 17 bold'), 
+        [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget ($)', font='Font2 17 bold'), 
+        [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Salary (%)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='Font3 17 bold'), 
+        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Operating Cost (%)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
