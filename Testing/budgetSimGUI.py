@@ -22,6 +22,12 @@ import pandas as pd
 # For Image Saving
 from PIL import ImageGrab
 
+# Custom Font importing
+import pyglet
+pyglet.font.add_file(r'./Fonts/Font1.ttf')
+pyglet.font.add_file(r'./Fonts/Font2.ttf')
+pyglet.font.add_file(r'./Fonts/Font3.ttf')
+
 
 def create_budget_graphs(inputs):
 
@@ -587,13 +593,13 @@ if __name__ == '__main__':
         [sg.Column(layoutCol1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 20))],
-        [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
+        [sg.P(), sg.T('Contract Term (Y)', font='Font1 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
+        [sg.P(), sg.T('Annual Budget ($)', font='Font2 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Salary (%)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='_ 17 bold'), 
+        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='Font3 17 bold'), 
                     sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Operating Cost (%)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
