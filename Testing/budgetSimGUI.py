@@ -557,22 +557,23 @@ def nameYourPrice():
     priceBus = 400000
     priceCharger = 15000
     priceInstall = 15000
+    hlTotalCapital = priceBus+priceCharger+priceInstall
 
-    # User dependent
+    # User 
     userDeployNum = 1
     userAnnualBudget = 80000
     userContractTerm = 10
     userMilesPerDay = 100
     userDaysOperate = 180
+    userMR = 10000        
 
+    # Admin
     hlMilesPerkWh = 2
     hlPricekWh = .2
     hlContractPriceEsc = .03
     hlInflation = .02
-
-    # operating
+    
     calcFuel = hlMilesPerkWh*hlPricekWh*userMilesPerDay*userDaysOperate
-    userMR = 10000        
 
     targetNPV = 25000
 
@@ -582,20 +583,17 @@ def nameYourPrice():
     # annual operating cost .. fuel+MR -> inflation 
     hlAnnualOperate = []
     for i in range(userContractTerm):
-        hlAnnualOperate.append(int((userMR+calcFuel) * pow(1+hlInflation, i)))
+        hlAnnualOperate.append(int(userDeployNum*((userMR+calcFuel) * pow(1+hlInflation, i))))
 
     hlAnnualContract = [0]*userContractTerm          
     currentNPV = 0
     hlAnnualProfit = [0]*userContractTerm
     hlAnnualPV = [0]*userContractTerm
-    hlTotalCapital = priceBus+priceCharger+priceInstall
     
     loopLower = 0
     loopMiddle = userAnnualBudget/2
     loopUpper = userAnnualBudget
     hlAnnualContract[0] = loopMiddle
-
-    counter = 0
 
     while currentNPV != targetNPV:
         hlContractNetPV = 0
@@ -617,16 +615,15 @@ def nameYourPrice():
         for i in range(userContractTerm):
             hlContractNetPV = hlContractNetPV+hlAnnualPV[i]
     
-        hlTotalNetPV = hlContractNetPV-hlTotalCapital
+        hlTotalNetPV = hlContractNetPV-(hlTotalCapital*userDeployNum)
 
+        currentNPV = round(hlTotalNetPV)
+
+        # # PRINTS
         # print(" Annual Contract", hlAnnualContract)
         # print(" Annual Profit", hlAnnualProfit)
         # print(" Annual PV", hlAnnualPV)
         # print(" Annual NET PV", hlContractNetPV)
-
-
-        currentNPV = round(hlTotalNetPV)
-
         # print(currentNPV, end='')
         # print("  ", hlTotalNetPV, "  ", end='')
         # print("   MIDDLE", loopMiddle, "  LOWER", loopLower, "  UPPER", loopUpper)
@@ -680,12 +677,16 @@ if __name__ == '__main__':
 
 
     # Get last inputted -- file is formatted in same order as displayed inputs
-    savedInputs = []
+    savedInputs1 = []
     with open(r'./Settings/previousInputs.txt', 'r') as inputFile:
         for line in inputFile:
             for input in line.split():
-                savedInputs.append(input)
-
+                savedInputs1.append(input)
+    savedInputs2 = []
+    with open(r'./Settings/previousInputs.txt', 'r') as inputFile:
+        for line in inputFile:
+            for input in line.split():
+                savedInputs2.append(input)
     # --------------------------------------------------- #
     # Font types
     # Highland Font 1 = "UniversalSans-500"
@@ -694,6 +695,7 @@ if __name__ == '__main__':
     fontNormalButtons = ("UniversalSans-775", 16)
     fontNormalInputs = ("UniversalSans-775", 16)
     fontNormalInputs2 = ("UniversalSans-680", 13)
+    fontBigHeader = ("UniversalSans-775", 34)
     fontHeader = ("UniversalSans-775", 24)
 
 
@@ -715,33 +717,33 @@ if __name__ == '__main__':
     layout1Col1 = [
         [sg.Column(layout1Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Deployment Year (Y)', font=fontNormalInputs), 
-                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=savedInputs1[0], key='-DEPLOY-YEAR-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Contract Term (Y)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[1]):,}", key='-CONTRACT-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget ($)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[2]):,}", key='-ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget - Salary (%)', font=fontNormalInputs), 
-                    sg.I(default_text=float(savedInputs[3]), key='-BUDGET-SALARY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=float(savedInputs1[3]), key='-BUDGET-SALARY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget - Capital (%)', font=fontNormalInputs), 
-                    sg.I(default_text=float(savedInputs[4]), key='-BUDGET-CAPITAL-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=float(savedInputs1[4]), key='-BUDGET-CAPITAL-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget - Operating (%)', font=fontNormalInputs), 
-                    sg.I(default_text=float(savedInputs[5]), key='-BUDGET-OPERATING-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=float(savedInputs1[5]), key='-BUDGET-OPERATING-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Fleet Size (#)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[6]):,}", key='-FLEET-SIZE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Mileage per Bus (#)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[7]):,}", key='-ANNUAL-MILES-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Average MPG (#)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{float(savedInputs1[8]):,}", key='-WEIGHTED-MPG-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Fuel Cost per Gallon ($)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{float(savedInputs1[9]):,}", key='-FUEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Maint. & Repair Cost ($)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[10]):,}", key='-MR-COST-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Diesel Bus Purchase Price ($)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[11]):,}", key='-DIESEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Diesel Bus Financing Rate (%)', font=fontNormalInputs), 
-                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=savedInputs1[12], key='-DIESEL-RATE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font=fontNormalInputs), 
-                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+                    sg.I(default_text=f"{int(savedInputs1[13]):,}", key='-DIESEL-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout1Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
@@ -778,7 +780,7 @@ if __name__ == '__main__':
     layout1TopRow = [    
         [img_logo_1,
         sg.P(background_color='#338165'), 
-        sg.T('Highland Fleets Budget Simulation', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
+        sg.T('Highland Fleets Budget Simulation', font=fontBigHeader, text_color='#FFFFFF', background_color='#338165'),
         sg.P(background_color='#338165'),
         ]
     ]
@@ -799,7 +801,7 @@ if __name__ == '__main__':
     layout2TopRow = [    
         [img_logo_2,
         sg.P(background_color='#338165'), 
-        sg.T('Name Your Price!', font=fontHeader, text_color='#FFFFFF', background_color='#338165'),
+        sg.T('Name Your Price!', font=fontBigHeader, text_color='#FFFFFF', background_color='#338165'),
         sg.P(background_color='#338165'),
         ]
     ]
@@ -818,6 +820,18 @@ if __name__ == '__main__':
 
     layout2Col1 = [
         [sg.Column(layout2Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
+        [sg.P(), sg.T('Deployment Number (#)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[0], key='--DEPLOYMENT-NUMBER-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Budget ($)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[1], key='--ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Contract Length (Y)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[2], key='--CONTRACT-LENGTH-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Avg. Miles per Day (#)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[3], key='--AVG-MILES-DAY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Days in Operation (#)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[4], key='--DAYS-DRIVE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Maint. & Repairs ($)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[5], key='--MR-COST-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
@@ -862,8 +876,6 @@ if __name__ == '__main__':
         [sg.Column(layout1Total, key='-LAYOUT-1-', pad=((0,0),(0,0))), 
          sg.Column(layout2Total, expand_x=True, expand_y=True, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)
         ],
-        # [sg.VP(background_color='#b9b9b9')]
-        # [sg.VP()]
     ]
 
     # --------------------------------------------------- #
