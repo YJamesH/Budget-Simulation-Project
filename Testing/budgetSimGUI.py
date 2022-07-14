@@ -12,6 +12,12 @@ import numpy
 import numpy as np
 import math
 
+# Font import
+import pyglet
+pyglet.font.add_file(r".\Fonts\font1.ttf")
+pyglet.font.add_file(r".\Fonts\font2.ttf")
+pyglet.font.add_file(r".\Fonts\font3.ttf")
+
 # GUI 
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -345,7 +351,7 @@ def create_budget_graphs(inputs):
 
     # Create subplots, adjust size
     fig, axes = plt.subplots(nrows=2, ncols=2) #, gridspec_kw={'width_ratios': [10,9]}
-    plt.subplots_adjust(left=.07, bottom=.1, right=.84, top=.93, wspace=.85, hspace=.4)
+    plt.subplots_adjust(left=.08, bottom=.1, right=.82, top=.93, wspace=.85, hspace=.4)
 
     # All X Axis 
     yearsWDep = []
@@ -398,7 +404,7 @@ def create_budget_graphs(inputs):
     plt.ylabel('Millions')
     plt.xlabel('Year')
     plt.legend(["Current Budget", "Budget w/ Highland", "Savings"], 
-                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
+                bbox_to_anchor=(1,1.1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Budget Neutral Transition')
 
 
@@ -434,7 +440,7 @@ def create_budget_graphs(inputs):
     plt.ylabel('Millions')
     plt.xlabel('Year')
     plt.legend(["Current Budget", "Operating Cost", "Personnel Cost", "Highland Contract", "Capital Cost"], 
-                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
+                bbox_to_anchor=(1,1.1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Bottom Up Analysis')
 
 
@@ -452,7 +458,7 @@ def create_budget_graphs(inputs):
     plt.yticks(np.arange(0, Fig3YMax, Fig3YMax/5))
     plt.ylabel('Metric Tons (Thousand)')
     plt.xlabel('Year')
-    plt.legend(bbox_to_anchor=(1.54, 1), fontsize=9, shadow=True, facecolor='#fffef8')
+    plt.legend(bbox_to_anchor=(1, 1.1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Cumulative CO2 Reduced')
 
 
@@ -497,12 +503,12 @@ def create_budget_graphs(inputs):
     plt.ylabel('Millions')
     plt.xlabel('Year')
     plt.legend(["Current Budget", "Operating Cost", "Personnel Cost", "Highland Contract", "Capital Cost"], 
-                bbox_to_anchor=(1,1), fontsize=9, shadow=True, facecolor='#fffef8')
+                bbox_to_anchor=(1,1.1), fontsize=9, shadow=True, facecolor='#fffef8')
     plt.title('Short Term Bottom Up Analysis')
 
 
     # Plot configuration
-    fig.set_figheight(6)
+    fig.set_figheight(5)
     fig.set_figwidth(11)
 
     # background color
@@ -526,7 +532,7 @@ def create_empty_graph():
     axes[1,1].set_facecolor('#fffeea')
 
     # Defined size
-    fig.set_figheight(6)
+    fig.set_figheight(5)
     fig.set_figwidth(11)
     return plt.gcf()
 
@@ -652,7 +658,8 @@ def nameYourPrice():
 
 if __name__ == '__main__':
 
-    nameYourPrice()
+
+    # nameYourPrice()
 
     # Window Colors and background 
     # #b9b9b9  -->  light gray (background) 
@@ -680,77 +687,89 @@ if __name__ == '__main__':
                 savedInputs.append(input)
 
     # --------------------------------------------------- #
+    # Font types
+    # Highland Font 1 = "UniversalSans-500"
+    # Highland Font 2 = "UniversalSans-680"
+    # Highland Font 3 = "UniversalSans-775"
+    fontNormalButtons = ("UniversalSans-775", 16)
+    fontNormalInputs = ("UniversalSans-775", 16)
+    fontNormalInputs2 = ("UniversalSans-680", 13)
+    fontHeader = ("UniversalSans-775", 24)
+
+
     # LAYOUT 1 --- BUDGET SIMULATION
     layout1Col1TopRow = [
         [sg.P(background_color='#409de7'), 
-        sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
+        sg.T('Inputs', font=fontHeader, pad=((0,0),(16,16)), background_color='#409de7'), 
         sg.P(background_color='#409de7')]
     ]
 
     layout1Col1BotRow = [
-        [sg.B('Save Inputs', font='_ 16 bold', pad=((6,0),(6,6))), 
-        sg.B('Reset Inputs', font='_ 16 bold', pad=((6,0),(6,6))),
+        [sg.B('Save Inputs', font=fontNormalButtons, pad=((6,0),(6,6))), 
+        sg.B('Reset Inputs', font=fontNormalButtons, pad=((6,0),(6,6))),
         sg.P(background_color='#338165'), 
-        sg.B('Plot!', font='_ 16 bold', pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
+        sg.B('Plot!', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
         ]
     ]
 
     layout1Col1 = [
         [sg.Column(layout1Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
-        [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 20))],
-        [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget - Salary (%)', font='_ 17 bold'), 
-                    sg.I(default_text=float(savedInputs[3]), key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='_ 17 bold'), 
-                    sg.I(default_text=float(savedInputs[4]), key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Budget - Operating Cost (%)', font='_ 17 bold'), 
-                    sg.I(default_text=float(savedInputs[5]), key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Fleet Size (#)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Mileage per Bus (#)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Average MPG (#)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Fuel Cost per Gallon ($)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Maint. & Repair Cost ($)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Diesel Bus Purchase Price ($)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Diesel Bus Financing Rate (%)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font='_ 17 bold'), 
-                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
+        [sg.P(), sg.T('Deployment Year (Y)', font=fontNormalInputs), 
+                    sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Contract Term (Y)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[1]):,}", key='-CONTRACT-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Budget ($)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Budget - Salary (%)', font=fontNormalInputs), 
+                    sg.I(default_text=float(savedInputs[3]), key='-BUDGET-SALARY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Budget - Capital (%)', font=fontNormalInputs), 
+                    sg.I(default_text=float(savedInputs[4]), key='-BUDGET-CAPITAL-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Budget - Operating (%)', font=fontNormalInputs), 
+                    sg.I(default_text=float(savedInputs[5]), key='-BUDGET-OPERATING-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Fleet Size (#)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Mileage per Bus (#)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Average MPG (#)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Fuel Cost per Gallon ($)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Annual Maint. & Repair Cost ($)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Diesel Bus Purchase Price ($)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Diesel Bus Financing Rate (%)', font=fontNormalInputs), 
+                    sg.I(default_text=savedInputs[12], key='-DIESEL-RATE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font=fontNormalInputs), 
+                    sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout1Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
 
     layout1Col2TopRow = [
         [sg.P(background_color='#8dc7f6'), 
-        sg.T('Graphs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.T('Graphs', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6'), 
         sg.P(background_color='#8dc7f6')]
     ]
 
     layout1Col2BotRow = [
         [sg.Input(key='-SAVE-1-', visible=False, enable_events=True), 
         sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-1-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
-                      font='_ 16 bold', pad=((6,6),(6,6)), disabled=True),
+                      font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
         sg.P(background_color='#338165'),
-        sg.B(key='-CHANGE-MODE-1-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font='_ 16 bold', 
+        sg.B(key='-CHANGE-MODE-1-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
-        sg.B(key='-NAME-YOUR-PRICE-', button_text='Name your Price!', font='_ 16 bold', 
+        sg.B(key='-NAME-YOUR-PRICE-', button_text='Name your Price!', font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6'), visible=False)
         ]
     ]
 
     layout1Col2 = [
-        [sg.Column(layout1Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+        [sg.Column(layout1Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,25)))],
+        [sg.VP()],
         [sg.Canvas(key='canvas')],
-        [sg.Column(layout1Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+        [sg.VP()],
+        [sg.Column(layout1Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(25,0)))],
     ]
 
     # Image to display
@@ -768,8 +787,8 @@ if __name__ == '__main__':
         [sg.Column(layout1TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
         [sg.VP(background_color='#b9b9b9')], 
             [sg.P(background_color='#b9b9b9'), 
-                sg.Column(layout1Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
-                sg.Column(layout1Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
+                sg.Column(layout1Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((1,2),(0,0))),
+                sg.Column(layout1Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,5),(0,0))), 
             sg.P(background_color='#b9b9b9')],
         [sg.VP(background_color='#b9b9b9')]
     ]
@@ -780,20 +799,20 @@ if __name__ == '__main__':
     layout2TopRow = [    
         [img_logo_2,
         sg.P(background_color='#338165'), 
-        sg.T('Name Your Price!', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
+        sg.T('Name Your Price!', font=fontHeader, text_color='#FFFFFF', background_color='#338165'),
         sg.P(background_color='#338165'),
         ]
     ]
 
     layout2Col1TopRow = [
         [sg.P(background_color='#409de7'), 
-        sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
+        sg.T('Inputs', font=fontHeader, pad=((0,0),(16,16)), background_color='#409de7'), 
         sg.P(background_color='#409de7')]
     ]
 
     layout2Col1BotRow = [
         [sg.P(background_color='#338165'), 
-        sg.B('Calculate', font='_ 16 bold', pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
+        sg.B('Calculate', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
         ]
     ]
 
@@ -805,18 +824,18 @@ if __name__ == '__main__':
 
     layout2Col2TopRow = [
         [sg.P(background_color='#8dc7f6'), 
-        sg.T('Stuff', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.T('Stuff', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6'), 
         sg.P(background_color='#8dc7f6')]
     ]
 
     layout2Col2BotRow = [
         [sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
         sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
-                      font='_ 16 bold', pad=((6,6),(6,6)), disabled=True),
+                      font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
         sg.P(background_color='#338165'),
-        sg.B(key='-CHANGE-MODE-2-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font='_ 16 bold', 
+        sg.B(key='-CHANGE-MODE-2-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
-        sg.B(key='-BUDGET-SIM-', button_text='Budget Sim!', font='_ 16 bold', 
+        sg.B(key='-BUDGET-SIM-', button_text='Budget Sim!', font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6'), visible=False)
         ]
     ]
@@ -841,7 +860,10 @@ if __name__ == '__main__':
     # put everything in a col so it can be saved
     layout = [
         [sg.Column(layout1Total, key='-LAYOUT-1-', pad=((0,0),(0,0))), 
-         sg.Column(layout2Total, expand_x=True, expand_y=True, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)]
+         sg.Column(layout2Total, expand_x=True, expand_y=True, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)
+        ],
+        # [sg.VP(background_color='#b9b9b9')]
+        # [sg.VP()]
     ]
 
     # --------------------------------------------------- #
@@ -853,11 +875,11 @@ if __name__ == '__main__':
         figure_canvas_agg.get_tk_widget().pack(fill='both', expand=1, side='right')
         return figure_canvas_agg
 
-    window = sg.Window('Budget Simulation', layout, finalize=True, size=(1658, 837),
+    window = sg.Window('Budget Simulation', layout, finalize=True, size=(1550, 800),
                         margins=(0,0), grab_anywhere=True, relative_location=(300,60))
 
     # Set minimum window resizable size
-    window.TKroot.minsize(1250, 650)
+    # window.TKroot.minsize(1250, 650)
 
     # Start with Empty Graph
     curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
