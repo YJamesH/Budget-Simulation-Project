@@ -1,7 +1,9 @@
 # Plotting 
 from calendar import c
 from csv import excel
+from queue import Empty
 from this import s
+from turtle import color, update
 from webbrowser import BackgroundBrowser
 import matplotlib.pyplot as plt
 import matplotlib
@@ -59,9 +61,9 @@ def create_budget_graphs(inputs):
 
     # User Info Inputs  **CHANGE TO PERCENTAGES**
     annualBudget = inputs[2]                         # Total Annual Budget ~60m
-    annualBudgetSal = inputs[3]*annualBudget         # ~67% Annual Budget -> Salaries    
-    annualBudgetCap = inputs[4]*annualBudget         # ~17% Annual Budget -> Capital Cost
-    annualBudgetOp = inputs[5]*annualBudget          # ~17% Annual Budget -> Operating Costs
+    annualBudgetSal = (inputs[3]/100)*annualBudget         # ~67% Annual Budget -> Salaries    
+    annualBudgetCap = (inputs[4]/100)*annualBudget         # ~17% Annual Budget -> Capital Cost
+    annualBudgetOp = (inputs[5]/100)*annualBudget          # ~17% Annual Budget -> Operating Costs
 
     fleetSize = inputs[6]                            # Total Fleet Size 
     annualMiles = inputs[7]                          # Annual miles driven
@@ -538,17 +540,128 @@ def saveAsFile(element, filename):
     grab = ImageGrab.grab(bbox=box)
     grab.save(filename)
 
+
+
+def nameYourPrice():
+
+    # --------------------------------------------------- #
+    # INPUTS
+     
+    # Capital Costs
+    priceBus = 400000
+    priceCharger = 15000
+    priceInstall = 15000
+
+    # User dependent
+    userDeployNum = 1
+    userAnnualBudget = 80000
+    userContractTerm = 10
+    userMilesPerDay = 100
+    userDaysOperate = 180
+
+    hlMilesPerkWh = 2
+    hlPricekWh = .2
+    hlContractPriceEsc = .03
+    hlInflation = .02
+
+    # operating
+    calcFuel = hlMilesPerkWh*hlPricekWh*userMilesPerDay*userDaysOperate
+    userMR = 10000        
+
+    targetNPV = 25000
+
+    # --------------------------------------------------- #
+    # CALCULATIONS
+    
+    # annual operating cost .. fuel+MR -> inflation 
+    hlAnnualOperate = []
+    for i in range(userContractTerm):
+        hlAnnualOperate.append(int((userMR+calcFuel) * pow(1+hlInflation, i)))
+
+    hlAnnualContract = [0]*userContractTerm          
+    currentNPV = 0
+    hlAnnualProfit = [0]*userContractTerm
+    hlAnnualPV = [0]*userContractTerm
+    hlTotalCapital = priceBus+priceCharger+priceInstall
+    
+    loopLower = 0
+    loopMiddle = userAnnualBudget/2
+    loopUpper = userAnnualBudget
+    hlAnnualContract[0] = loopMiddle
+
+    counter = 0
+
+    while currentNPV != targetNPV:
+        hlContractNetPV = 0
+        hlTotalNetPV = 0
+
+        # Revenue
+        for i in range(1,userContractTerm):
+            hlAnnualContract[i] = hlAnnualContract[i-1]*(1+hlContractPriceEsc)
+
+        # Profit
+        for i in range(userContractTerm):
+            hlAnnualProfit[i] = hlAnnualContract[i]-hlAnnualOperate[i]
+
+        # Present Day Value
+        for i in range(userContractTerm):
+            hlAnnualPV[i] = int(hlAnnualProfit[i]/pow(1+hlInflation, i))
+
+        # Net PV for Contract
+        for i in range(userContractTerm):
+            hlContractNetPV = hlContractNetPV+hlAnnualPV[i]
+    
+        hlTotalNetPV = hlContractNetPV-hlTotalCapital
+
+        # print(" Annual Contract", hlAnnualContract)
+        # print(" Annual Profit", hlAnnualProfit)
+        # print(" Annual PV", hlAnnualPV)
+        # print(" Annual NET PV", hlContractNetPV)
+
+
+        currentNPV = round(hlTotalNetPV)
+
+        # print(currentNPV, end='')
+        # print("  ", hlTotalNetPV, "  ", end='')
+        # print("   MIDDLE", loopMiddle, "  LOWER", loopLower, "  UPPER", loopUpper)
+
+        # change our bounds for next loop, exit if NPV is good
+        if currentNPV < targetNPV:
+            loopLower = loopMiddle
+            loopMiddle = (loopLower+loopUpper)/2
+            hlAnnualContract[0] = loopMiddle
+            if int(loopMiddle) == int(loopLower):
+                break
+        elif currentNPV > targetNPV:
+            loopUpper = loopMiddle
+            loopMiddle = (loopLower+loopUpper)/2
+            hlAnnualContract[0] = loopMiddle
+            if int(loopMiddle) == int(loopUpper):
+                break
+        else:
+            break
+
+        # counter = counter+1
+        # print(counter)
+
+    # print(hlAnnualContract)
+    # print(hlAnnualProfit)
+    # print(hlContractNetPV)
+    # print(hlTotalNetPV)
+    # print(currentNPV)
+
 if __name__ == '__main__':
 
+    nameYourPrice()
+
     # Window Colors and background 
-    # #b9b9b9                      light gray (background)                     
-    # #fffeea                      tan yellow
-    # #338165                      green
-    # #f0bf4c                      bus yellow
-    # #fdbd1c                      button yellow
-    # #3d4043                      dark gray (text)
-    # #409de7                      Dark Blue
-    # #8dc7f6                      Light Blue
+    # #b9b9b9  -->  light gray (background) 
+    # #3d4043  -->  dark gray (text)                    
+    # #fffeea  -->  tan yellow
+    # #338165  -->  Highland green
+    # #fdbd1c  -->  Highland yellow
+    # #8dc7f6  -->  Light Blue
+    # #409de7  -->  Dark Blue
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
@@ -567,22 +680,23 @@ if __name__ == '__main__':
                 savedInputs.append(input)
 
     # --------------------------------------------------- #
-    # FORMATTING #
-    layoutCol1TopRow = [
+    # LAYOUT 1 --- BUDGET SIMULATION
+    layout1Col1TopRow = [
         [sg.P(background_color='#409de7'), 
         sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
         sg.P(background_color='#409de7')]
     ]
 
-    layoutCol1BotRow = [
-        [sg.P(background_color='#338165'), 
-        sg.B('Plot!', font='_ 16 bold', pad=((0,6),(6,6))), 
-        sg.B('Reset Inputs', font='_ 16 bold', pad=((0,6),(6,6)))
+    layout1Col1BotRow = [
+        [sg.B('Save Inputs', font='_ 16 bold', pad=((6,0),(6,6))), 
+        sg.B('Reset Inputs', font='_ 16 bold', pad=((6,0),(6,6))),
+        sg.P(background_color='#338165'), 
+        sg.B('Plot!', font='_ 16 bold', pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
         ]
     ]
 
-    layoutCol1 = [
-        [sg.Column(layoutCol1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
+    layout1Col1 = [
+        [sg.Column(layout1Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Deployment Year (Y)', font='_ 17 bold'), 
                     sg.I(default_text=savedInputs[0], key='-DEPLOY-YEAR-', font='_ 12', do_not_clear=True, size=(11, 20))],
         [sg.P(), sg.T('Contract Term (Y)', font='_ 17 bold'), 
@@ -590,20 +704,20 @@ if __name__ == '__main__':
         [sg.P(), sg.T('Annual Budget ($)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[2]):,}", key='-ANNUAL-BUDGET-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Salary (%)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[3], key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
+                    sg.I(default_text=float(savedInputs[3]), key='-BUDGET-SALARY-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Capital Cost (%)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[4], key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
+                    sg.I(default_text=float(savedInputs[4]), key='-BUDGET-CAPITAL-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Annual Budget - Operating Cost (%)', font='_ 17 bold'), 
-                    sg.I(default_text=savedInputs[5], key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
+                    sg.I(default_text=float(savedInputs[5]), key='-BUDGET-OPERATING-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Fleet Size (#)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[6]):,}", key='-FLEET-SIZE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Annual Mileage (#)', font='_ 17 bold'), 
+        [sg.P(), sg.T('Annual Mileage per Bus (#)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[7]):,}", key='-ANNUAL-MILES-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Average MPG (#)', font='_ 17 bold'), 
                     sg.I(default_text=f"{float(savedInputs[8]):,}", key='-WEIGHTED-MPG-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Fuel Cost per Gallon ($)', font='_ 17 bold'), 
                     sg.I(default_text=f"{float(savedInputs[9]):,}", key='-FUEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
-        [sg.P(), sg.T('Maintenance & Repairs Cost ($)', font='_ 17 bold'), 
+        [sg.P(), sg.T('Annual Maint. & Repair Cost ($)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[10]):,}", key='-MR-COST-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.P(), sg.T('Diesel Bus Purchase Price ($)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[11]):,}", key='-DIESEL-PRICE-', font='_ 12', do_not_clear=True, size=(11, 1))],
@@ -612,72 +726,343 @@ if __name__ == '__main__':
         [sg.P(), sg.T('Diesel Bus Financing Term (Y)', font='_ 17 bold'), 
                     sg.I(default_text=f"{int(savedInputs[13]):,}", key='-DIESEL-TERM-', font='_ 12', do_not_clear=True, size=(11, 1))],
         [sg.VP()],
-        [sg.Column(layoutCol1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
+        [sg.Column(layout1Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
 
-    layoutCol2TopRow = [
+    layout1Col2TopRow = [
         [sg.P(background_color='#8dc7f6'), 
         sg.T('Graphs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#8dc7f6'), 
         sg.P(background_color='#8dc7f6')]
     ]
 
-    layoutCol2BotRow = [
-        [sg.P(background_color='#338165'), 
-            sg.Input(key='-SAVE-AS-', visible=False, enable_events=True), 
-            sg.FileSaveAs(key='-SAVEASBUTTON-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
-                          font='_ 16 bold', pad=((0,6),(6,6)), disabled=True)
+    layout1Col2BotRow = [
+        [sg.Input(key='-SAVE-1-', visible=False, enable_events=True), 
+        sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-1-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
+                      font='_ 16 bold', pad=((6,6),(6,6)), disabled=True),
+        sg.P(background_color='#338165'),
+        sg.B(key='-CHANGE-MODE-1-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font='_ 16 bold', 
+             pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
+        sg.B(key='-NAME-YOUR-PRICE-', button_text='Name your Price!', font='_ 16 bold', 
+             pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6'), visible=False)
         ]
     ]
 
-    layoutCol2 = [
-        [sg.Column(layoutCol2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+    layout1Col2 = [
+        [sg.Column(layout1Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
         [sg.Canvas(key='canvas')],
-        [sg.Column(layoutCol2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+        [sg.Column(layout1Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
     ]
 
     # Image to display
-    img_logo = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
+    img_logo_1 = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
 
-    layoutTopRow = [    
-        [
-            img_logo,
-            sg.P(background_color='#338165'), 
-            sg.T('Highland Fleets Budget Simulation', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
-            sg.P(background_color='#338165'),
+    layout1TopRow = [    
+        [img_logo_1,
+        sg.P(background_color='#338165'), 
+        sg.T('Highland Fleets Budget Simulation', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
+        sg.P(background_color='#338165'),
         ]
     ]
 
-    layoutTotal = [
-        [sg.Column(layoutTopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+    layout1Total = [
+        [sg.Column(layout1TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
         [sg.VP(background_color='#b9b9b9')], 
             [sg.P(background_color='#b9b9b9'), 
-                sg.Column(layoutCol1, key='-COLUMN-ONE-', expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
-                sg.Column(layoutCol2, key = '-COLUMN-TWO-', expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
+                sg.Column(layout1Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
+                sg.Column(layout1Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
+            sg.P(background_color='#b9b9b9')],
+        [sg.VP(background_color='#b9b9b9')]
+    ]
+
+
+    # LAYOUT 2 --- NAME YOUR PRICE 
+    img_logo_2 = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
+    layout2TopRow = [    
+        [img_logo_2,
+        sg.P(background_color='#338165'), 
+        sg.T('Name Your Price!', font='_ 28 bold', text_color='#FFFFFF', background_color='#338165'),
+        sg.P(background_color='#338165'),
+        ]
+    ]
+
+    layout2Col1TopRow = [
+        [sg.P(background_color='#409de7'), 
+        sg.T('Inputs', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#409de7'), 
+        sg.P(background_color='#409de7')]
+    ]
+
+    layout2Col1BotRow = [
+        [sg.P(background_color='#338165'), 
+        sg.B('Calculate', font='_ 16 bold', pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
+        ]
+    ]
+
+    layout2Col1 = [
+        [sg.Column(layout2Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
+        [sg.VP()],
+        [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
+    ]
+
+    layout2Col2TopRow = [
+        [sg.P(background_color='#8dc7f6'), 
+        sg.T('Stuff', font='_ 24 bold', pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.P(background_color='#8dc7f6')]
+    ]
+
+    layout2Col2BotRow = [
+        [sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
+        sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
+                      font='_ 16 bold', pad=((6,6),(6,6)), disabled=True),
+        sg.P(background_color='#338165'),
+        sg.B(key='-CHANGE-MODE-2-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font='_ 16 bold', 
+             pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
+        sg.B(key='-BUDGET-SIM-', button_text='Budget Sim!', font='_ 16 bold', 
+             pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6'), visible=False)
+        ]
+    ]
+
+    layout2Col2 = [
+        [sg.Column(layout2Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+        [sg.VP()],
+        [sg.Column(layout2Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+    ]
+
+
+    layout2Total = [
+        [sg.Column(layout2TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+        [sg.VP(background_color='#b9b9b9')], 
+            [sg.P(background_color='#b9b9b9'), 
+                sg.Column(layout2Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
+                sg.Column(layout2Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
             sg.P(background_color='#b9b9b9')],
         [sg.VP(background_color='#b9b9b9')]
     ]
 
     # put everything in a col so it can be saved
-    layout = [[sg.Column(layoutTotal, key='-SAVE-THIS-', pad=((0,0),(0,0)))]]
+    layout = [
+        [sg.Column(layout1Total, key='-LAYOUT-1-', pad=((0,0),(0,0))), 
+         sg.Column(layout2Total, expand_x=True, expand_y=True, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)]
+    ]
 
     # --------------------------------------------------- #
 
-    # PySimpleGUI GUI Create
+    # PySimpleGUI GUI Creation
     def draw_figure(canvas, figure):
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(fill='both', expand=1, side='right')
         return figure_canvas_agg
 
-    window = sg.Window('Budget Simulation', layout, element_justification='right', 
-                        finalize=True, margins=(0,0), grab_anywhere=True, relative_location=(-250, 25))
+    window = sg.Window('Budget Simulation', layout, finalize=True, size=(1658, 837),
+                        margins=(0,0), grab_anywhere=True, relative_location=(300,60))
 
     # Set minimum window resizable size
     window.TKroot.minsize(1250, 650)
 
     # Start with Empty Graph
     curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
-    
+
+
+    # --------------------------------------------------- #
+    # Function makes sure all Inputs are within specified bounds
+    #  Turns input background color red if fails check
+    #  Returns True is pass, False if fail
+    def inputChecker(window, values):
+        # will be true if any error at all
+        someError = False
+        
+        # Grab bounds for Deploy Year and Contract Term
+        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=9, nrows=3)
+        DYLowerBound = excelBounds.iat[0,0]
+        CTLowerBound = excelBounds.iat[1,0]
+        CTUpperBound = excelBounds.iat[2,0]
+
+        # Deployment Year - integer, 2021<X
+        text = values['-DEPLOY-YEAR-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(num >= DYLowerBound)
+            window['-DEPLOY-YEAR-'].update(background_color='#fffef3')
+        except:
+            window['-DEPLOY-YEAR-'].update(background_color='red')
+            someError = True
+
+        # Contract Term - integer, 5<X<=20
+        text = values['-CONTRACT-TERM-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(CTLowerBound <= num <= CTUpperBound)
+            window['-CONTRACT-TERM-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-CONTRACT-TERM-'].update(background_color='red')
+            someError = True
+
+        # Annual Budget Total - integer, 0<X
+        text = values['-ANNUAL-BUDGET-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 < num)
+            window['-ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-ANNUAL-BUDGET-'].update(background_color='red')
+            someError = True
+
+        # Budget Salary Cost Percentage - float, 0<=X<=1
+        text = values['-BUDGET-SALARY-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 <= num <= 100)
+            window['-BUDGET-SALARY-'].update(background_color='#fffef3')
+        except:
+            window['-BUDGET-SALARY-'].update(background_color='red')
+            someError = True
+
+        # Budget Capital Cost Percentage - float, 0<=X<=1
+        text = values['-BUDGET-CAPITAL-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 <= num <= 100)
+            window['-BUDGET-CAPITAL-'].update(background_color='#fffef3')
+        except:
+            window['-BUDGET-CAPITAL-'].update(background_color='red')
+            someError = True
+
+        # Budget Operating Cost Percentage - float, 0<=X<=1
+        text = values['-BUDGET-OPERATING-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 <= num <= 100)
+            window['-BUDGET-OPERATING-'].update(background_color='#fffef3')
+        except:
+            window['-BUDGET-OPERATING-'].update(background_color='red')
+            someError = True
+
+        # Total Fleet Size - integer, 0<X
+        text = values['-FLEET-SIZE-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 < num)
+            window['-FLEET-SIZE-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-FLEET-SIZE-'].update(background_color='red')
+            someError = True
+
+        # Annual Mileage - integer, 0<=X
+        text = values['-ANNUAL-MILES-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['-ANNUAL-MILES-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-ANNUAL-MILES-'].update(background_color='red')
+            someError = True
+
+        # Weighted MPG - float, 0<X
+        text = values['-WEIGHTED-MPG-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 < num)
+            window['-WEIGHTED-MPG-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-WEIGHTED-MPG-'].update(background_color='red')
+            someError = True
+
+        # Fuel Price - float, 0<=X
+        text = values['-FUEL-PRICE-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 <= num)
+            window['-FUEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-FUEL-PRICE-'].update(background_color='red')
+            someError = True
+
+        # Maintenance and Repairs Year 1 Cost - integer, 0<=X
+        text = values['-MR-COST-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['-MR-COST-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-MR-COST-'].update(background_color='red')
+            someError = True
+
+        # Diesel Bus Total Price - integer, 0<=X
+        text = values['-DIESEL-PRICE-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['-DIESEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-DIESEL-PRICE-'].update(background_color='red')
+            someError = True
+        
+        # Diesel Finance Rate - float, 0<=X<=1
+        text = values['-DIESEL-RATE-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 <= num <= 1)
+            window['-DIESEL-RATE-'].update(background_color='#fffef3')
+        except:
+            window['-DIESEL-RATE-'].update(background_color='red')
+            someError = True
+
+        # Diesel Finance Term - integer, 0<=X
+        text = values['-DIESEL-TERM-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['-DIESEL-TERM-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['-DIESEL-TERM-'].update(background_color='red')
+            someError = True
+
+        if someError:
+            return False
+        else:
+            return True
+
+
+    # Function gathers all user Inputs, changes type, returns as one list
+    def gatherUserInput(values):
+        userInputs = []
+        userInputs.append(int(values['-DEPLOY-YEAR-'].replace(',','')))
+        userInputs.append(int(values['-CONTRACT-TERM-'].replace(',','')))
+        userInputs.append(int(values['-ANNUAL-BUDGET-'].replace(',','')))
+        userInputs.append(float(values['-BUDGET-SALARY-'].replace(',','')))
+        userInputs.append(float(values['-BUDGET-CAPITAL-'].replace(',','')))
+        userInputs.append(float(values['-BUDGET-OPERATING-'].replace(',','')))
+        userInputs.append(int(values['-FLEET-SIZE-'].replace(',','')))
+        userInputs.append(int(values['-ANNUAL-MILES-'].replace(',','')))
+        userInputs.append(float(values['-WEIGHTED-MPG-'].replace(',','')))
+        userInputs.append(float(values['-FUEL-PRICE-'].replace(',','')))
+        userInputs.append(int(values['-MR-COST-'].replace(',','')))
+        userInputs.append(int(values['-DIESEL-PRICE-'].replace(',','')))
+        userInputs.append(float(values['-DIESEL-RATE-'].replace(',','')))
+        userInputs.append(int(values['-DIESEL-TERM-'].replace(',','')))
+
+        return userInputs
+
+    # --------------------------------------------------- #
+    # Window Running:
+
+    # Global Variables
+    changeModeStatus = False
+
     while (True):
         event, values = window.read()
         
@@ -685,190 +1070,13 @@ if __name__ == '__main__':
             break
         if event=="Plot!":
             
-            # --------------------------------------------------- #
-            # User Error Check
-            someError = False
-            
-            # Grab bounds for Deploy Year and Contract Term
-            excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=9, nrows=3)
-            DYLowerBound = excelBounds.iat[0,0]
-            CTLowerBound = excelBounds.iat[1,0]
-            CTUpperBound = excelBounds.iat[2,0]
-
-            # Deployment Year - integer, 2021<X
-            text = values['-DEPLOY-YEAR-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(num >= DYLowerBound)
-                window['-DEPLOY-YEAR-'].update(background_color='#fffef3')
-            except:
-                window['-DEPLOY-YEAR-'].update(background_color='red')
-                someError = True
-
-            # Contract Term - integer, 5<X<=20
-            text = values['-CONTRACT-TERM-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(CTLowerBound <= num <= CTUpperBound)
-                window['-CONTRACT-TERM-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-CONTRACT-TERM-'].update(background_color='red')
-                someError = True
-
-            # Annual Budget Total - integer, 0<X
-            text = values['-ANNUAL-BUDGET-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 < num)
-                window['-ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-ANNUAL-BUDGET-'].update(background_color='red')
-                someError = True
-
-            # Budget Salary Cost Percentage - float, 0<=X<=1
-            text = values['-BUDGET-SALARY-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 <= num <= 1)
-                window['-BUDGET-SALARY-'].update(background_color='#fffef3')
-            except:
-                window['-BUDGET-SALARY-'].update(background_color='red')
-                someError = True
-
-            # Budget Capital Cost Percentage - float, 0<=X<=1
-            text = values['-BUDGET-CAPITAL-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 <= num <= 1)
-                window['-BUDGET-CAPITAL-'].update(background_color='#fffef3')
-            except:
-                window['-BUDGET-CAPITAL-'].update(background_color='red')
-                someError = True
- 
-            # Budget Operating Cost Percentage - float, 0<=X<=1
-            text = values['-BUDGET-OPERATING-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 <= num <= 1)
-                window['-BUDGET-OPERATING-'].update(background_color='#fffef3')
-            except:
-                window['-BUDGET-OPERATING-'].update(background_color='red')
-                someError = True
-
-            # Total Fleet Size - integer, 0<X
-            text = values['-FLEET-SIZE-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 < num)
-                window['-FLEET-SIZE-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-FLEET-SIZE-'].update(background_color='red')
-                someError = True
-
-            # Annual Mileage - integer, 0<=X
-            text = values['-ANNUAL-MILES-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 <= num)
-                window['-ANNUAL-MILES-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-ANNUAL-MILES-'].update(background_color='red')
-                someError = True
-
-            # Weighted MPG - float, 0<X
-            text = values['-WEIGHTED-MPG-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 < num)
-                window['-WEIGHTED-MPG-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-WEIGHTED-MPG-'].update(background_color='red')
-                someError = True
-
-            # Fuel Price - float, 0<=X
-            text = values['-FUEL-PRICE-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 <= num)
-                window['-FUEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-FUEL-PRICE-'].update(background_color='red')
-                someError = True
-
-            # Maintenance and Repairs Year 1 Cost - integer, 0<=X
-            text = values['-MR-COST-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 <= num)
-                window['-MR-COST-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-MR-COST-'].update(background_color='red')
-                someError = True
-
-            # Diesel Bus Total Price - integer, 0<=X
-            text = values['-DIESEL-PRICE-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 <= num)
-                window['-DIESEL-PRICE-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-DIESEL-PRICE-'].update(background_color='red')
-                someError = True
-            
-            # Diesel Finance Rate - float, 0<=X<=1
-            text = values['-DIESEL-RATE-']
-            try:
-                text = text.replace(',','')
-                num = float(text)
-                assert(0 <= num <= 1)
-                window['-DIESEL-RATE-'].update(background_color='#fffef3')
-            except:
-                window['-DIESEL-RATE-'].update(background_color='red')
-                someError = True
-
-            # Diesel Finance Term - integer, 0<=X
-            text = values['-DIESEL-TERM-']
-            try:
-                text = text.replace(',','')
-                num = int(text)
-                assert(0 <= num)
-                window['-DIESEL-TERM-'].update(f"{num:,}", background_color='#fffef3')
-            except:
-                window['-DIESEL-TERM-'].update(background_color='red')
-                someError = True
-
-            if someError:
+            # Checks if inputs are within bounds -> do nothing if fails
+            passedCheck = inputChecker(window, values)
+            if not passedCheck:
                 continue
-            # --------------------------------------------------- #
 
-            # Get the user input information
-            userInputs = []
-            userInputs.append(int(values['-DEPLOY-YEAR-'].replace(',','')))
-            userInputs.append(int(values['-CONTRACT-TERM-'].replace(',','')))
-            userInputs.append(int(values['-ANNUAL-BUDGET-'].replace(',','')))
-            userInputs.append(float(values['-BUDGET-SALARY-'].replace(',','')))
-            userInputs.append(float(values['-BUDGET-CAPITAL-'].replace(',','')))
-            userInputs.append(float(values['-BUDGET-OPERATING-'].replace(',','')))
-            userInputs.append(int(values['-FLEET-SIZE-'].replace(',','')))
-            userInputs.append(int(values['-ANNUAL-MILES-'].replace(',','')))
-            userInputs.append(float(values['-WEIGHTED-MPG-'].replace(',','')))
-            userInputs.append(float(values['-FUEL-PRICE-'].replace(',','')))
-            userInputs.append(int(values['-MR-COST-'].replace(',','')))
-            userInputs.append(int(values['-DIESEL-PRICE-'].replace(',','')))
-            userInputs.append(float(values['-DIESEL-RATE-'].replace(',','')))
-            userInputs.append(int(values['-DIESEL-TERM-'].replace(',','')))
+            # Grab user inputs
+            userInputs = gatherUserInput(values)
 
             # Update Previous Inputs file
             with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
@@ -882,7 +1090,7 @@ if __name__ == '__main__':
             # tempGraph.subplots_adjust(right=1.2)
 
             # Only able to save when there is graph on screen
-            window['-SAVEASBUTTON-'].update(disabled=False)
+            window['-SAVE-AS-1-'].update(disabled=False)
 
             # Draw the graphs created
             curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
@@ -899,9 +1107,9 @@ if __name__ == '__main__':
             window['-DEPLOY-YEAR-'].update(newInputs[0])
             window['-CONTRACT-TERM-'].update(f"{int(newInputs[1]):,}")
             window['-ANNUAL-BUDGET-'].update(f"{int(newInputs[2]):,}")
-            window['-BUDGET-SALARY-'].update(newInputs[3])
-            window['-BUDGET-CAPITAL-'].update(newInputs[4])
-            window['-BUDGET-OPERATING-'].update(newInputs[5])
+            window['-BUDGET-SALARY-'].update(float(newInputs[3]))
+            window['-BUDGET-CAPITAL-'].update(float(newInputs[4]))
+            window['-BUDGET-OPERATING-'].update(float(newInputs[5]))
             window['-FLEET-SIZE-'].update(f"{int(newInputs[6]):,}")
             window['-ANNUAL-MILES-'].update(f"{int(newInputs[7]):,}")
             window['-WEIGHTED-MPG-'].update(f"{float(newInputs[8]):,}")
@@ -917,11 +1125,58 @@ if __name__ == '__main__':
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
+        # Write inputs to backup inputs text file
+        if event=='Save Inputs':
+            # Check User inputs
+            passedCheck = inputChecker(window, values)
+            if not passedCheck:
+                continue
+
+            # Get inputs and write into backupInputs.txt
+            userInputs = gatherUserInput(values)
+            with open(r'./Settings/backupInputs.txt', 'w') as inputFile:
+                for input in userInputs:
+                    inputFile.write(str(input)) 
+                    inputFile.write(' ')
+
         # Save Screen of GUI as PNG, JPG, etc.
-        if event=='-SAVE-AS-':
-            savePath = values['-SAVE-AS-']
+        if event=='-SAVE-1-':
+            savePath = values['-SAVE-1-']
             print(savePath)
-            saveAsFile(window['-SAVE-THIS-'], savePath)
+            saveAsFile(window['-LAYOUT-1-'], savePath)
+
+
+        # Change mode button
+        if event=='-CHANGE-MODE-1-':
+            if changeModeStatus:
+                window['-NAME-YOUR-PRICE-'].update(visible=False)
+                window['-CHANGE-MODE-1-'].update(text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD)
+                changeModeStatus=False
+            else:
+                window['-NAME-YOUR-PRICE-'].update(visible=True)
+                window['-CHANGE-MODE-1-'].update(text='Change Mode'+sg.SYMBOL_RIGHT_ARROWHEAD)
+                changeModeStatus=True
+
+        if event=='-CHANGE-MODE-2-':
+            if changeModeStatus:
+                window['-BUDGET-SIM-'].update(visible=False)
+                window['-CHANGE-MODE-2-'].update(text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD)
+                changeModeStatus=False
+            else:
+                window['-BUDGET-SIM-'].update(visible=True)
+                window['-CHANGE-MODE-2-'].update(text='Change Mode'+sg.SYMBOL_RIGHT_ARROWHEAD)
+                changeModeStatus=True
+
+        # Switch Screen layouts
+        if event=='-NAME-YOUR-PRICE-':
+            window['-LAYOUT-2-'].update(visible=True)
+            window['-LAYOUT-1-'].update(visible=False)
+
+        if event=='-BUDGET-SIM-':
+            window['-LAYOUT-1-'].update(visible=True)
+            window['-LAYOUT-2-'].update(visible=False)
+
+        
 
 
     window.close()
