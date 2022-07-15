@@ -2,6 +2,8 @@
 from calendar import c
 from csv import excel
 from queue import Empty
+from re import L
+from sqlite3 import Row
 from this import s
 from turtle import color, update
 from webbrowser import BackgroundBrowser
@@ -259,11 +261,16 @@ def create_budget_graphs(inputs):
     for simDepYear in range(contractTerm+1):
         budgetStaQuo.append(int(annualBudget * pow(1+costEsc, simDepYear)))
 
-    budgetDiffRBN = []              # Budget Difference (Diesel costs avoided - Highland Contract)
+    savingsRBN = []                 # Budget Saved (Diesel costs avoided - Highland Contract) (cannot be negative)
     for i in range(contractTerm+1): 
         tempSub = totalDCA[i]-contractYearPrice[i]
         if tempSub<0:
             tempSub=0
+        savingsRBN.append(tempSub)
+
+    budgetDiffRBN = []              # Budget Difference (Diesel costs avoided - Highland Contract)
+    for i in range(contractTerm+1): 
+        tempSub = totalDCA[i]-contractYearPrice[i]
         budgetDiffRBN.append(tempSub)
 
     ### Total Budget With Highland ###
@@ -271,6 +278,8 @@ def create_budget_graphs(inputs):
     for simDepYear in range(contractTerm+1):
         tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
         finalRBudget.append(tempSub)
+
+
 
     # # Prints
     # print("Total DCA", totalDCA, "\n")
@@ -391,7 +400,7 @@ def create_budget_graphs(inputs):
     plt.plot(yearsWDep, budgetStaQuo[0:contractTerm+1], 'r', label='Budget SQ')
     plt.plot([], [], 'b', linewidth=5)     # Houston ISD Budget
     plt.plot([], [], 'y', linewidth=5)     # Budget with Highland
-    plt.stackplot(yearsWDep, finalRBudget[0:contractTerm+1], budgetDiffRBN[0:contractTerm+1], colors=['b','y'])
+    plt.stackplot(yearsWDep, finalRBudget[0:contractTerm+1], savingsRBN[0:contractTerm+1], colors=['b','y'])
 
     # Figure Y Max
     Fig1YMax = round(budgetStaQuo[contractTerm]+10000000,-7)
@@ -536,6 +545,23 @@ def create_empty_graph():
     fig.set_figwidth(11)
     return plt.gcf()
 
+def create_empty_table():
+    fig, axes = plt.subplots()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+
+    # background color
+    axes.set_facecolor('#fffeea')
+
+    # hide axes
+    fig.patch.set_visible(False)
+    axes.axis('off')
+    axes.axis('tight')
+
+    # Defined size
+    fig.set_figheight(5)
+    fig.set_figwidth(11)
+    return plt.gcf()
+
 def delete_prev_graph(curr_fig):
     curr_fig.get_tk_widget().forget()
     plt.close('all')
@@ -547,8 +573,7 @@ def saveAsFile(element, filename):
     grab.save(filename)
 
 
-
-def nameYourPrice():
+def nameYourPrice(inputs):
 
     # --------------------------------------------------- #
     # INPUTS
@@ -560,11 +585,11 @@ def nameYourPrice():
     hlTotalCapital = priceBus+priceCharger+priceInstall
 
     # User 
-    userDeployNum = 1
-    userAnnualBudget = 80000
-    userContractTerm = 10
-    userMilesPerDay = 100
-    userDaysOperate = 180
+    userDeployNum = inputs[0]
+    userAnnualBudget = inputs[1]
+    userContractTerm = inputs[2]
+    userMilesPerDay = inputs[3]
+    userDaysOperate = inputs[4]
     userMR = 10000        
 
     # Admin
@@ -644,19 +669,68 @@ def nameYourPrice():
         else:
             break
 
-        # counter = counter+1
-        # print(counter)
 
-    # print(hlAnnualContract)
-    # print(hlAnnualProfit)
-    # print(hlContractNetPV)
-    # print(hlTotalNetPV)
-    # print(currentNPV)
+    # Table for GUI
+    fig, axes = plt.subplots()
+    
+    data = [[],[],[],[],[],[],[]]
+    for i in range(userContractTerm):
+        data[0].append(int(hlAnnualContract[i]))
+        data[1].append(int(hlAnnualOperate[i]))
+        data[2].append(int(hlAnnualProfit[i]))
+        data[3].append(int(hlAnnualPV[i]))
+    
+    data[4].append(int(hlContractNetPV))
+    data[5].append(int(hlTotalCapital))
+    data[6].append(int(currentNPV))
+
+    for i in range(1,userContractTerm):
+        data[4].append(0)
+        data[5].append(0)
+        data[6].append(0)
+
+    columns = np.arange(2023, 2023+userContractTerm, 1)
+    row1Title = 'Deployed: '+ str(userDeployNum)
+    rows = [row1Title, 'COGS', 'Profit', 'PV', 'Net PV', 'Capital Costs', 'Net PV - Capital']
+
+    # hide axes
+    fig.patch.set_visible(False)
+
+
+    # tableColor= [['#fffeea']*userContractTerm, 
+    #               ['#fffeea']*userContractTerm, 
+    #               ['#fffeea']*userContractTerm, 
+    #               ['#fffeea']*userContractTerm, 
+    #             ]
+
+    myTable = axes.table(cellText=data, rowLabels=rows, colLabels=columns, loc='center', 
+               cellLoc='center') # cellColours=tableColor
+
+    axes.axis('tight')
+    axes.axis('off')
+
+    myTable.auto_set_font_size(False)
+    myTable.set_fontsize(12)
+    myTable.scale(1,2)
+
+    # cellDict = myTable.get_celld()
+    # for i in range(userContractTerm):
+    #     for j in range(8):
+    #         cellDict[(j,i)].set_height(.2)
+
+    fig.tight_layout()
+
+    # Plot configuration
+    fig.set_figheight(5)
+    fig.set_figwidth(11)
+
+    return plt.gcf()
+        
+        
+
+
 
 if __name__ == '__main__':
-
-
-    # nameYourPrice()
 
     # Window Colors and background 
     # #b9b9b9  -->  light gray (background) 
@@ -678,12 +752,12 @@ if __name__ == '__main__':
 
     # Get last inputted -- file is formatted in same order as displayed inputs
     savedInputs1 = []
-    with open(r'./Settings/previousInputs.txt', 'r') as inputFile:
+    with open(r'./Settings/previousInputs1.txt', 'r') as inputFile:
         for line in inputFile:
             for input in line.split():
                 savedInputs1.append(input)
     savedInputs2 = []
-    with open(r'./Settings/previousInputs.txt', 'r') as inputFile:
+    with open(r'./Settings/previousInputs2.txt', 'r') as inputFile:
         for line in inputFile:
             for input in line.split():
                 savedInputs2.append(input)
@@ -707,10 +781,10 @@ if __name__ == '__main__':
     ]
 
     layout1Col1BotRow = [
-        [sg.B('Save Inputs', font=fontNormalButtons, pad=((6,0),(6,6))), 
-        sg.B('Reset Inputs', font=fontNormalButtons, pad=((6,0),(6,6))),
+        [sg.B('Save Inputs', key='-SAVE-INPUTS-', font=fontNormalButtons, pad=((6,0),(6,6))), 
+        sg.B('Reset Inputs', key='-RESET-INPUTS-', font=fontNormalButtons, pad=((6,0),(6,6))),
         sg.P(background_color='#338165'), 
-        sg.B('Plot!', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
+        sg.B('Plot!', key='-PLOT-', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
         ]
     ]
 
@@ -767,9 +841,9 @@ if __name__ == '__main__':
     ]
 
     layout1Col2 = [
-        [sg.Column(layout1Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,25)))],
+        [sg.Column(layout1Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,17)))],
         [sg.VP()],
-        [sg.Canvas(key='canvas')],
+        [sg.Canvas(key='canvas1')],
         [sg.VP()],
         [sg.Column(layout1Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(25,0)))],
     ]
@@ -814,7 +888,7 @@ if __name__ == '__main__':
 
     layout2Col1BotRow = [
         [sg.P(background_color='#338165'), 
-        sg.B('Calculate', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
+        sg.B('Calculate!', key='--CALCULATE-', font=fontNormalButtons, pad=((0,6),(6,6)), button_color=('#3d4043', '#5ce625')) 
         ]
     ]
 
@@ -829,9 +903,7 @@ if __name__ == '__main__':
         [sg.P(), sg.T('Avg. Miles per Day (#)', font=fontNormalInputs), 
             sg.I(default_text=savedInputs2[3], key='--AVG-MILES-DAY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Days in Operation (#)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[4], key='--DAYS-DRIVE-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
-        [sg.P(), sg.T('Annual Maint. & Repairs ($)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[5], key='--MR-COST-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=savedInputs2[4], key='--DAYS-IN-OPERATION-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
@@ -843,9 +915,10 @@ if __name__ == '__main__':
     ]
 
     layout2Col2BotRow = [
-        [sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
-        sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
-                      font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
+        [
+        # sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
+        # sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
+        #               font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
         sg.P(background_color='#338165'),
         sg.B(key='-CHANGE-MODE-2-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
@@ -856,6 +929,8 @@ if __name__ == '__main__':
 
     layout2Col2 = [
         [sg.Column(layout2Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+        [sg.VP()],
+        [sg.Canvas(key='canvas2')],
         [sg.VP()],
         [sg.Column(layout2Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
     ]
@@ -894,14 +969,14 @@ if __name__ == '__main__':
     # window.TKroot.minsize(1250, 650)
 
     # Start with Empty Graph
-    curr_fig = draw_figure(window['canvas'].TKCanvas, create_empty_graph())
+    curr_fig = draw_figure(window['canvas1'].TKCanvas, create_empty_graph())
 
 
     # --------------------------------------------------- #
     # Function makes sure all Inputs are within specified bounds
     #  Turns input background color red if fails check
     #  Returns True is pass, False if fail
-    def inputChecker(window, values):
+    def inputChecker1(window, values):
         # will be true if any error at all
         someError = False
         
@@ -1072,7 +1147,7 @@ if __name__ == '__main__':
 
 
     # Function gathers all user Inputs, changes type, returns as one list
-    def gatherUserInput(values):
+    def gatherUserInput1(values):
         userInputs = []
         userInputs.append(int(values['-DEPLOY-YEAR-'].replace(',','')))
         userInputs.append(int(values['-CONTRACT-TERM-'].replace(',','')))
@@ -1091,6 +1166,16 @@ if __name__ == '__main__':
 
         return userInputs
 
+    def gatherUserInput2(values):
+        userInputs = []
+        userInputs.append(int(values['--DEPLOYMENT-NUMBER-'].replace(',','')))
+        userInputs.append(int(values['--ANNUAL-BUDGET-'].replace(',','')))
+        userInputs.append(int(values['--CONTRACT-LENGTH-'].replace(',','')))
+        userInputs.append(float(values['--AVG-MILES-DAY-'].replace(',','')))
+        userInputs.append(int(values['--DAYS-IN-OPERATION-'].replace(',','')))
+
+        return userInputs
+
     # --------------------------------------------------- #
     # Window Running:
 
@@ -1102,37 +1187,38 @@ if __name__ == '__main__':
         
         if event == sg.WINDOW_CLOSED:
             break
-        if event=="Plot!":
+
+        # LAYOUT 1 --- BUDGET SIMULATION
+        if event=='-PLOT-':
             
             # Checks if inputs are within bounds -> do nothing if fails
-            passedCheck = inputChecker(window, values)
+            passedCheck = inputChecker1(window, values)
             if not passedCheck:
                 continue
 
             # Grab user inputs
-            userInputs = gatherUserInput(values)
+            userInputs = gatherUserInput1(values)
 
             # Update Previous Inputs file
-            with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
+            with open(r'./Settings/previousInputs1.txt', 'w') as inputFile:
                 for input in userInputs:
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
             # Delete old graph and replace with updated graph
             delete_prev_graph(curr_fig)
-            tempGraph = create_budget_graphs(userInputs)
-            # tempGraph.subplots_adjust(right=1.2)
+            newGraph = create_budget_graphs(userInputs)
 
             # Only able to save when there is graph on screen
             window['-SAVE-AS-1-'].update(disabled=False)
 
             # Draw the graphs created
-            curr_fig = draw_figure(window['canvas'].TKCanvas, tempGraph)
+            curr_fig = draw_figure(window['canvas1'].TKCanvas, newGraph)
 
-        if event=="Reset Inputs":
+        if event=='-RESET-INPUTS-':
             # Get inputs from backup file
             newInputs = []
-            with open(r'./Settings/backupInputs.txt', 'r') as inputFile:
+            with open(r'./Settings/backupInputs1.txt', 'r') as inputFile:
                 for line in inputFile:
                     for input in line.split():
                         newInputs.append(input)
@@ -1154,21 +1240,21 @@ if __name__ == '__main__':
             window['-DIESEL-TERM-'].update(f"{int(newInputs[13]):,}")
 
             # Write to previous Inputs
-            with open(r'./Settings/previousInputs.txt', 'w') as inputFile:
+            with open(r'./Settings/previousInputs1.txt', 'w') as inputFile:
                 for input in newInputs:
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
         # Write inputs to backup inputs text file
-        if event=='Save Inputs':
+        if event=='-SAVE-INPUTS-':
             # Check User inputs
-            passedCheck = inputChecker(window, values)
+            passedCheck = inputChecker1(window, values)
             if not passedCheck:
                 continue
 
-            # Get inputs and write into backupInputs.txt
-            userInputs = gatherUserInput(values)
-            with open(r'./Settings/backupInputs.txt', 'w') as inputFile:
+            # Get inputs and write into backupInputs1.txt
+            userInputs = gatherUserInput1(values)
+            with open(r'./Settings/backupInputs1.txt', 'w') as inputFile:
                 for input in userInputs:
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
@@ -1178,7 +1264,6 @@ if __name__ == '__main__':
             savePath = values['-SAVE-1-']
             print(savePath)
             saveAsFile(window['-LAYOUT-1-'], savePath)
-
 
         # Change mode button
         if event=='-CHANGE-MODE-1-':
@@ -1190,6 +1275,35 @@ if __name__ == '__main__':
                 window['-NAME-YOUR-PRICE-'].update(visible=True)
                 window['-CHANGE-MODE-1-'].update(text='Change Mode'+sg.SYMBOL_RIGHT_ARROWHEAD)
                 changeModeStatus=True
+
+
+        # LAYOUT 2 --- BUDGET SIMULATION
+        if event=='--CALCULATE-':
+            delete_prev_graph(curr_fig)
+            userInputs = gatherUserInput2(values)
+
+            # with open(r'./Settings/previousInputs2.txt', 'w') as inputFile:
+            #     for input in userInputs:
+            #         inputFile.write(str(input)) 
+            #         inputFile.write(' ')
+
+            # window['--DEPLOYMENT-NUMBER-'].update(newInputs[0])
+            # window['--ANNUAL-BUDGET-'].update(f"{int(newInputs[1]):,}")
+            # window['--CONTRACT-LENGTH-'].update(f"{int(newInputs[2]):,}")
+            # window['--AVG-MILES-DAY-'].update(float(newInputs[3]))
+            # window['--DAYS-IN-OPERATION-'].update(int(newInputs[4]))
+
+            print(userInputs)
+
+            newTable = nameYourPrice(userInputs)
+
+            # Only able to save when there is graph on screen
+            # window['-SAVE-AS-1-'].update(disabled=False)
+
+            # Draw the graphs created
+            curr_fig = draw_figure(window['canvas2'].TKCanvas, newTable)
+
+
 
         if event=='-CHANGE-MODE-2-':
             if changeModeStatus:
@@ -1206,9 +1320,17 @@ if __name__ == '__main__':
             window['-LAYOUT-2-'].update(visible=True)
             window['-LAYOUT-1-'].update(visible=False)
 
+            delete_prev_graph(curr_fig)
+            curr_fig = draw_figure(window['canvas2'].TKCanvas, create_empty_table())
+
+
         if event=='-BUDGET-SIM-':
             window['-LAYOUT-1-'].update(visible=True)
             window['-LAYOUT-2-'].update(visible=False)
+
+            delete_prev_graph(curr_fig)
+            curr_fig = draw_figure(window['canvas1'].TKCanvas, create_empty_graph())
+            print("got here")
 
         
 
