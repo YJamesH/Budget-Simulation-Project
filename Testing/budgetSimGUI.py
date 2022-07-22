@@ -688,12 +688,47 @@ def nameYourPrice(inputs):
     # Table for GUI
     fig, axes = plt.subplots()
     
-    data = [[],[],[],[],[],[],[]]
-    for i in range(userContractTerm):
-        data[0].append(int(hlAnnualContract[i]))
-        data[1].append(int(hlAnnualOperate[i]))
-        data[2].append(int(hlAnnualProfit[i]))
-        data[3].append(int(hlAnnualPV[i]))
+    data = []
+    emptyList = [0]*(userContractTerm+userDeployYears-1)
+    for i in range(userDeployYears+2):
+        data.append(emptyList.copy())
+
+    # Calculate deployment spread and insert in data
+    if hlDeployNum<userDeployYears:
+        for i in range(hlDeployNum):
+            data[i][i] = data[i][i]+1
+    else:
+        deployCounter = userDeployYears-1
+        for i in range(hlDeployNum):
+            if deployCounter < 0:
+                deployCounter = userDeployYears-1
+            data[deployCounter][deployCounter] = data[deployCounter][deployCounter] + 1
+            deployCounter = deployCounter-1
+    # Continue the pattern for contract term
+    for i in range(userDeployYears):
+        tempNum = data[i][i]
+        for j in range(userContractTerm):
+            data[i][i+j] = tempNum
+
+    # Total Deployment per year
+    hlAnnualDeploy = []
+    for i in range(userContractTerm+userDeployYears-1):
+        tempSum = 0
+        for j in range(userDeployYears):
+            tempSum = tempSum + data[j][i]
+        hlAnnualDeploy.append(tempSum)
+
+    # Total Contract per year
+    hlAnnualCP = []
+    hlPerBusValue = int(hlFinalContract[0]/hlDeployNum)
+    for i in range(userContractTerm+userDeployYears-1):
+        hlAnnualCP.append(hlAnnualDeploy[i]*hlPerBusValue)
+
+    for i in range(userContractTerm+userDeployYears-1):
+        data[-2][i] = hlAnnualDeploy[i]
+        data[-1][i] = hlAnnualCP[i]
+
+
     
     # data[4].append(int(hlContractNetPV))
     # data[5].append(int(hlTotalCapital))
