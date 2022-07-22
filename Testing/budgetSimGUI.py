@@ -89,7 +89,7 @@ def create_budget_graphs(inputs):
     # Admin Inputs   **Read from excel sheet "Budget Simulation - Admin.xlsx"
     
     # Read from excel sheet
-    excelVars = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=2, nrows=6)
+    excelVars = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=3, nrows=6)
     excelContract = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "I,J", header=3, nrows=20)
 
     # Admin Variables
@@ -585,11 +585,12 @@ def nameYourPrice(inputs):
     hlTotalCapital = priceBus+priceCharger+priceInstall
 
     # User 
-    userDeployNum = inputs[0]
+    userDeployYears = inputs[0]
     userAnnualBudget = inputs[1]
     userContractTerm = inputs[2]
     userMilesPerDay = inputs[3]
     userDaysOperate = inputs[4]
+    userGrants = 0
     userMR = 10000        
 
     # Admin
@@ -600,75 +601,89 @@ def nameYourPrice(inputs):
     
     calcFuel = hlMilesPerkWh*hlPricekWh*userMilesPerDay*userDaysOperate
 
-    targetNPV = 25000
-
     # --------------------------------------------------- #
     # CALCULATIONS
-    
-    # annual operating cost .. fuel+MR -> inflation 
-    hlAnnualOperate = []
-    for i in range(userContractTerm):
-        hlAnnualOperate.append(int(userDeployNum*((userMR+calcFuel) * pow(1+hlInflation, i))))
 
+    # variables
+    hlAnnualOperate = [0]*userContractTerm
     hlAnnualContract = [0]*userContractTerm          
-    currentNPV = 0
     hlAnnualProfit = [0]*userContractTerm
     hlAnnualPV = [0]*userContractTerm
-    
-    loopLower = 0
-    loopMiddle = userAnnualBudget/2
-    loopUpper = userAnnualBudget
-    hlAnnualContract[0] = loopMiddle
 
-    while currentNPV != targetNPV:
-        hlContractNetPV = 0
-        hlTotalNetPV = 0
+    calcTotalContract = sum(hlAnnualContract)
+    calcTotalBudget = userAnnualBudget*userContractTerm
 
-        # Revenue
-        for i in range(1,userContractTerm):
-            hlAnnualContract[i] = hlAnnualContract[i-1]*(1+hlContractPriceEsc)
+    hlDeployNum = -1
 
-        # Profit
-        for i in range(userContractTerm):
-            hlAnnualProfit[i] = hlAnnualContract[i]-hlAnnualOperate[i]
+    # SOLVE FOR:
+    hlFinalContract = []
 
-        # Present Day Value
-        for i in range(userContractTerm):
-            hlAnnualPV[i] = int(hlAnnualProfit[i]/pow(1+hlInflation, i))
+    # Finds contract price with target NPV of 25000 per bus
+    def createContract():
 
-        # Net PV for Contract
-        for i in range(userContractTerm):
-            hlContractNetPV = hlContractNetPV+hlAnnualPV[i]
-    
-        hlTotalNetPV = hlContractNetPV-(hlTotalCapital*userDeployNum)
+        # Loop Variables
+        loopLB = 0
+        loopUB = userAnnualBudget*userContractTerm
+        loopCurrent = int(loopUB/2)
+        hlAnnualContract[0] = loopCurrent
 
-        currentNPV = round(hlTotalNetPV)
+        currentNPV = 0
+        while 1:
+            # 
+            hlContractNetPV = 0
 
-        # # PRINTS
-        # print(" Annual Contract", hlAnnualContract)
-        # print(" Annual Profit", hlAnnualProfit)
-        # print(" Annual PV", hlAnnualPV)
-        # print(" Annual NET PV", hlContractNetPV)
-        # print(currentNPV, end='')
-        # print("  ", hlTotalNetPV, "  ", end='')
-        # print("   MIDDLE", loopMiddle, "  LOWER", loopLower, "  UPPER", loopUpper)
+            # Operating Costs
+            for i in range(userContractTerm):
+                hlAnnualOperate[i] = int(hlDeployNum*((userMR+calcFuel) * pow(1+hlInflation, i)))
 
-        # change our bounds for next loop, exit if NPV is good
-        if currentNPV < targetNPV:
-            loopLower = loopMiddle
-            loopMiddle = (loopLower+loopUpper)/2
-            hlAnnualContract[0] = loopMiddle
-            if int(loopMiddle) == int(loopLower):
-                break
-        elif currentNPV > targetNPV:
-            loopUpper = loopMiddle
-            loopMiddle = (loopLower+loopUpper)/2
-            hlAnnualContract[0] = loopMiddle
-            if int(loopMiddle) == int(loopUpper):
-                break
-        else:
+            # Temp Contract Price
+            for i in range(1,userContractTerm):
+                hlAnnualContract[i] = int(hlAnnualContract[i-1]*(1+hlContractPriceEsc))
+
+            # Profit
+            for i in range(userContractTerm):
+                hlAnnualProfit[i] = hlAnnualContract[i]-hlAnnualOperate[i]
+
+            # Present Day Value
+            for i in range(userContractTerm):
+                hlAnnualPV[i] = int(hlAnnualProfit[i]/pow(1+hlInflation, i))
+
+            # Net PV for Contract
+            for i in range(userContractTerm):
+                hlContractNetPV = hlContractNetPV+hlAnnualPV[i]
+
+            hlTotalNetPV = hlContractNetPV-(hlTotalCapital*hlDeployNum)
+            currentNPV = round(hlTotalNetPV)
+
+            # change our bounds for next loop, exit if NPV is good
+            if currentNPV < targetNPV:
+                loopLB = loopCurrent
+                loopCurrent = int((loopLB+loopUB)/2)
+                if int(loopCurrent) == int(loopLB):
+                    return hlAnnualContract
+                hlAnnualContract[0] = loopCurrent
+            elif currentNPV > targetNPV:
+                loopUB = loopCurrent
+                loopCurrent = int((loopLB+loopUB)/2)
+                if int(loopCurrent) == int(loopUB):
+                    return hlAnnualContract
+                hlAnnualContract[0] = loopCurrent
+            else:
+                return hlAnnualContract
+
+    while calcTotalContract<calcTotalBudget:
+        hlDeployNum = hlDeployNum+1
+        targetNPV = 25000*hlDeployNum
+        hlNewContract = createContract()
+        calcTotalContract = sum(hlNewContract)
+
+        if calcTotalContract>calcTotalBudget:
+            hlDeployNum = hlDeployNum-1
             break
+        else:
+            hlFinalContract = hlNewContract.copy()
 
+    # --------------------------------------------------- #
 
     # Table for GUI
     fig, axes = plt.subplots()
@@ -680,18 +695,24 @@ def nameYourPrice(inputs):
         data[2].append(int(hlAnnualProfit[i]))
         data[3].append(int(hlAnnualPV[i]))
     
-    data[4].append(int(hlContractNetPV))
-    data[5].append(int(hlTotalCapital))
-    data[6].append(int(currentNPV))
+    # data[4].append(int(hlContractNetPV))
+    # data[5].append(int(hlTotalCapital))
+    # data[6].append(int(currentNPV))
 
-    for i in range(1,userContractTerm):
-        data[4].append(0)
-        data[5].append(0)
-        data[6].append(0)
+    # for i in range(1,userContractTerm):
+    #     data[4].append(0)
+    #     data[5].append(0)
+    #     data[6].append(0)
 
-    columns = np.arange(2023, 2023+userContractTerm, 1)
-    row1Title = 'Deployed: '+ str(userDeployNum)
-    rows = [row1Title, 'COGS', 'Profit', 'PV', 'Net PV', 'Capital Costs', 'Net PV - Capital']
+
+    columns = np.arange(2023, 2023+userContractTerm+userDeployYears-1, 1)
+    
+    rows = []
+    for i in range(userDeployYears):
+        tempRowTitle = 'Deployment '+ str(i+1) + ':'
+        rows.append(tempRowTitle)
+    rows.extend(['Total Deployed', 'Contract Price'])
+
 
     # hide axes
     fig.patch.set_visible(False)
@@ -705,6 +726,7 @@ def nameYourPrice(inputs):
 
     myTable = axes.table(cellText=data, rowLabels=rows, colLabels=columns, loc='center', 
                cellLoc='center') # cellColours=tableColor
+
 
     axes.axis('tight')
     axes.axis('off')
@@ -894,8 +916,8 @@ if __name__ == '__main__':
 
     layout2Col1 = [
         [sg.Column(layout2Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
-        [sg.P(), sg.T('Deployment Number (#)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[0], key='--DEPLOYMENT-NUMBER-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Years to Deploy (Y)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[0], key='--DEPLOYMENT-YEARS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget ($)', font=fontNormalInputs), 
             sg.I(default_text=savedInputs2[1], key='--ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Contract Length (Y)', font=fontNormalInputs), 
@@ -904,6 +926,8 @@ if __name__ == '__main__':
             sg.I(default_text=savedInputs2[3], key='--AVG-MILES-DAY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Days in Operation (#)', font=fontNormalInputs), 
             sg.I(default_text=savedInputs2[4], key='--DAYS-IN-OPERATION-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Grants ($)', font=fontNormalInputs), 
+            sg.I(default_text=savedInputs2[5], key='--GRANTS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
@@ -981,7 +1005,7 @@ if __name__ == '__main__':
         someError = False
         
         # Grab bounds for Deploy Year and Contract Term
-        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=9, nrows=3)
+        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=10, nrows=3)
         DYLowerBound = excelBounds.iat[0,0]
         CTLowerBound = excelBounds.iat[1,0]
         CTUpperBound = excelBounds.iat[2,0]
@@ -1145,6 +1169,86 @@ if __name__ == '__main__':
         else:
             return True
 
+    def inputChecker2(window, values):
+        # will be true if any error at all
+        someError = False
+        
+        # Grab bounds for Deploy Year and Contract Term
+        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=15, nrows=3)
+        CTLowerBound = excelBounds.iat[0,0]
+        CTUpperBound = excelBounds.iat[1,0]
+        DYUpperBound = excelBounds.iat[2,0]
+
+        # Years to Deploy Buses - integer, 0<X<20
+        text = values['--DEPLOYMENT-YEARS-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 < num <= DYUpperBound)
+            window['--DEPLOYMENT-YEARS-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--DEPLOYMENT-YEARS-'].update(background_color='red')
+            someError = True
+
+        # Annual Budget Total - integer, 0<X
+        text = values['--ANNUAL-BUDGET-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 < num)
+            window['--ANNUAL-BUDGET-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--ANNUAL-BUDGET-'].update(background_color='red')
+            someError = True
+
+        # Contract Length - integer, 0<=X
+        text = values['--CONTRACT-LENGTH-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(CTLowerBound <= num <= CTUpperBound)
+            window['--CONTRACT-LENGTH-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--CONTRACT-LENGTH-'].update(background_color='red')
+            someError = True
+
+        # Average Miles Per Day - float, 0<X
+        text = values['--AVG-MILES-DAY-']
+        try:
+            text = text.replace(',','')
+            num = float(text)
+            assert(0 < num)
+            window['--AVG-MILES-DAY-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--AVG-MILES-DAY-'].update(background_color='red')
+            someError = True
+
+        # Days Operating - int, 0<=X
+        text = values['--DAYS-IN-OPERATION-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['--DAYS-IN-OPERATION-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--DAYS-IN-OPERATION-'].update(background_color='red')
+            someError = True
+
+        # grants - int, 0<=X
+        text = values['--GRANTS-']
+        try:
+            text = text.replace(',','')
+            num = int(text)
+            assert(0 <= num)
+            window['--GRANTS-'].update(f"{num:,}", background_color='#fffef3')
+        except:
+            window['--GRANTS-'].update(background_color='red')
+            someError = True
+
+        if someError:
+            return False
+        else:
+            return True
 
     # Function gathers all user Inputs, changes type, returns as one list
     def gatherUserInput1(values):
@@ -1168,11 +1272,12 @@ if __name__ == '__main__':
 
     def gatherUserInput2(values):
         userInputs = []
-        userInputs.append(int(values['--DEPLOYMENT-NUMBER-'].replace(',','')))
+        userInputs.append(int(values['--DEPLOYMENT-YEARS-'].replace(',','')))
         userInputs.append(int(values['--ANNUAL-BUDGET-'].replace(',','')))
         userInputs.append(int(values['--CONTRACT-LENGTH-'].replace(',','')))
         userInputs.append(float(values['--AVG-MILES-DAY-'].replace(',','')))
         userInputs.append(int(values['--DAYS-IN-OPERATION-'].replace(',','')))
+        userInputs.append(int(values['--GRANTS-'].replace(',','')))
 
         return userInputs
 
@@ -1262,7 +1367,6 @@ if __name__ == '__main__':
         # Save Screen of GUI as PNG, JPG, etc.
         if event=='-SAVE-1-':
             savePath = values['-SAVE-1-']
-            print(savePath)
             saveAsFile(window['-LAYOUT-1-'], savePath)
 
         # Change mode button
@@ -1279,21 +1383,23 @@ if __name__ == '__main__':
 
         # LAYOUT 2 --- BUDGET SIMULATION
         if event=='--CALCULATE-':
+            # Prevent double graphing
             delete_prev_graph(curr_fig)
+            
+            # Grab user inputs
             userInputs = gatherUserInput2(values)
 
-            # with open(r'./Settings/previousInputs2.txt', 'w') as inputFile:
-            #     for input in userInputs:
-            #         inputFile.write(str(input)) 
-            #         inputFile.write(' ')
+            # Update Previous Inputs file
+            with open(r'./Settings/previousInputs2.txt', 'w') as inputFile:
+                for input in userInputs:
+                    inputFile.write(str(input)) 
+                    inputFile.write(' ')
 
-            # window['--DEPLOYMENT-NUMBER-'].update(newInputs[0])
-            # window['--ANNUAL-BUDGET-'].update(f"{int(newInputs[1]):,}")
-            # window['--CONTRACT-LENGTH-'].update(f"{int(newInputs[2]):,}")
-            # window['--AVG-MILES-DAY-'].update(float(newInputs[3]))
-            # window['--DAYS-IN-OPERATION-'].update(int(newInputs[4]))
+            # Checks if inputs are within bounds -> do nothing if fails
+            passedCheck = inputChecker2(window, values)
+            if not passedCheck:
+                continue
 
-            print(userInputs)
 
             newTable = nameYourPrice(userInputs)
 
