@@ -68,7 +68,7 @@ def create_budget_graphs(inputs):
     contractTerm = inputs[1]                         # Contract Term/Life of Bus
 
     # User Info Inputs  **CHANGE TO PERCENTAGES**
-    annualBudget = inputs[2]                         # Total Annual Budget ~60m
+    annualBudget = inputs[2]                               # Total Annual Budget ~60m
     annualBudgetSal = (inputs[3]/100)*annualBudget         # ~67% Annual Budget -> Salaries    
     annualBudgetCap = (inputs[4]/100)*annualBudget         # ~17% Annual Budget -> Capital Cost
     annualBudgetOp = (inputs[5]/100)*annualBudget          # ~17% Annual Budget -> Operating Costs
@@ -77,11 +77,11 @@ def create_budget_graphs(inputs):
     annualMiles = inputs[7]                          # Annual miles driven
     weightedMPG = inputs[8]                          # Average mpg
     fuelPriceGal = inputs[9]                         # $/gallon fuel
-    MRCost = inputs[10]                               # M&R base cost
+    MRCost = inputs[10]                              # M&R base cost
     
     # Diesel Info Inputs
-    dieselPrice = inputs[11]                          # Price of 1 Diesel Bus ~120k
-    dieselRate = inputs[12]                           # _%/year ~2%/year
+    dieselPrice = inputs[11]                         # Price of 1 Diesel Bus ~120k
+    dieselRate = inputs[12]                          # _%/year ~2%/year
     dieselTerm = inputs[13]                          # Years to Finance Bus
 
 
@@ -517,7 +517,7 @@ def create_budget_graphs(inputs):
 
 
     # Plot configuration
-    fig.set_figheight(5)
+    fig.set_figheight(5.07)
     fig.set_figwidth(11)
 
     # background color
@@ -541,7 +541,7 @@ def create_empty_graph():
     axes[1,1].set_facecolor('#fffeea')
 
     # Defined size
-    fig.set_figheight(5)
+    fig.set_figheight(5.07)
     fig.set_figwidth(11)
     return plt.gcf()
 
@@ -558,8 +558,8 @@ def create_empty_table():
     axes.axis('tight')
 
     # Defined size
-    fig.set_figheight(5)
-    fig.set_figwidth(11)
+    fig.set_figheight(5.5)
+    fig.set_figwidth(11.38)
     return plt.gcf()
 
 def delete_prev_graph(curr_fig):
@@ -572,7 +572,6 @@ def saveAsFile(element, filename):
     grab = ImageGrab.grab(bbox=box)
     grab.save(filename)
 
-
 def nameYourPrice(inputs):
 
     # --------------------------------------------------- #
@@ -582,7 +581,6 @@ def nameYourPrice(inputs):
     priceBus = 400000
     priceCharger = 15000
     priceInstall = 15000
-    hlTotalCapital = priceBus+priceCharger+priceInstall
 
     # User 
     userDeployYears = inputs[0]
@@ -590,8 +588,12 @@ def nameYourPrice(inputs):
     userContractTerm = inputs[2]
     userMilesPerDay = inputs[3]
     userDaysOperate = inputs[4]
-    userGrants = 0
+    userGrants = inputs[5]
     userMR = 10000        
+
+    hlTotalCapital = priceBus+priceCharger+priceInstall-userGrants
+    if hlTotalCapital<0:
+        hlTotalCapital = 0
 
     # Admin
     hlMilesPerkWh = 2
@@ -671,6 +673,7 @@ def nameYourPrice(inputs):
             else:
                 return hlAnnualContract
 
+    # Run until highest deployed is hit
     while calcTotalContract<calcTotalBudget:
         hlDeployNum = hlDeployNum+1
         targetNPV = 25000*hlDeployNum
@@ -720,24 +723,15 @@ def nameYourPrice(inputs):
 
     # Total Contract per year
     hlAnnualCP = []
-    hlPerBusValue = int(hlFinalContract[0]/hlDeployNum)
+    hlPerBusValue = 0
+    if hlDeployNum != 0:
+        hlPerBusValue = int(hlFinalContract[0]/hlDeployNum)
     for i in range(userContractTerm+userDeployYears-1):
         hlAnnualCP.append(hlAnnualDeploy[i]*hlPerBusValue)
 
     for i in range(userContractTerm+userDeployYears-1):
         data[-2][i] = hlAnnualDeploy[i]
         data[-1][i] = hlAnnualCP[i]
-
-
-    
-    # data[4].append(int(hlContractNetPV))
-    # data[5].append(int(hlTotalCapital))
-    # data[6].append(int(currentNPV))
-
-    # for i in range(1,userContractTerm):
-    #     data[4].append(0)
-    #     data[5].append(0)
-    #     data[6].append(0)
 
 
     columns = np.arange(2023, 2023+userContractTerm+userDeployYears-1, 1)
@@ -759,9 +753,9 @@ def nameYourPrice(inputs):
     #               ['#fffeea']*userContractTerm, 
     #             ]
 
-    myTable = axes.table(cellText=data, rowLabels=rows, colLabels=columns, loc='center', 
-               cellLoc='center') # cellColours=tableColor
 
+    myTable = axes.table(cellText=data, rowLabels=rows, colLabels=columns,
+               cellLoc='center', bbox=(0,0,1,1)) # cellColours=tableColor
 
     axes.axis('tight')
     axes.axis('off')
@@ -770,22 +764,20 @@ def nameYourPrice(inputs):
     myTable.set_fontsize(12)
     myTable.scale(1,2)
 
-    # cellDict = myTable.get_celld()
-    # for i in range(userContractTerm):
-    #     for j in range(8):
-    #         cellDict[(j,i)].set_height(.2)
+
+    # cellDict=myTable.get_celld()
+    # for i in range(len(rows)+1):
+    #     for j in range(len(columns)):
+    #         cellDict[(i,j)].set_width(0.5)
 
     fig.tight_layout()
 
     # Plot configuration
-    fig.set_figheight(5)
-    fig.set_figwidth(11)
+    fig.set_figheight(5.5)
+    fig.set_figwidth(11.38)
 
     return plt.gcf()
         
-        
-
-
 
 if __name__ == '__main__':
 
@@ -929,6 +921,7 @@ if __name__ == '__main__':
 
     # LAYOUT 2 --- NAME YOUR PRICE 
     img_logo_2 = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
+    
     layout2TopRow = [    
         [img_logo_2,
         sg.P(background_color='#338165'), 
@@ -952,32 +945,32 @@ if __name__ == '__main__':
     layout2Col1 = [
         [sg.Column(layout2Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Years to Deploy (Y)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[0], key='--DEPLOYMENT-YEARS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=f"{int(savedInputs2[0]):,}", key='--DEPLOYMENT-YEARS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Annual Budget ($)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[1], key='--ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=f"{int(savedInputs2[1]):,}", key='--ANNUAL-BUDGET-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Contract Length (Y)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[2], key='--CONTRACT-LENGTH-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=f"{int(savedInputs2[2]):,}", key='--CONTRACT-LENGTH-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Avg. Miles per Day (#)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[3], key='--AVG-MILES-DAY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=f"{float(savedInputs2[3]):,}", key='--AVG-MILES-DAY-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.P(), sg.T('Days in Operation (#)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[4], key='--DAYS-IN-OPERATION-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
-        [sg.P(), sg.T('Grants ($)', font=fontNormalInputs), 
-            sg.I(default_text=savedInputs2[5], key='--GRANTS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+            sg.I(default_text=f"{int(savedInputs2[4]):,}", key='--DAYS-IN-OPERATION-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
+        [sg.P(), sg.T('Grant Per Bus ($)', font=fontNormalInputs), 
+            sg.I(default_text=f"{int(savedInputs2[5]):,}", key='--GRANTS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
         [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
 
     layout2Col2TopRow = [
         [sg.P(background_color='#8dc7f6'), 
-        sg.T('Stuff', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.T('Deployment Table', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6'), 
         sg.P(background_color='#8dc7f6')]
     ]
 
     layout2Col2BotRow = [
         [
-        # sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
-        # sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
-        #               font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
+        sg.Input(key='-SAVE-2-', visible=False, enable_events=True), 
+        sg.FileSaveAs('Save Screenshot', key='-SAVE-AS-2-', file_types=(('PNG', '.png'), ('JPG', '.jpg')), 
+                      font=fontNormalButtons, pad=((6,6),(6,6)), disabled=True),
         sg.P(background_color='#338165'),
         sg.B(key='-CHANGE-MODE-2-', button_text='Change Mode'+sg.SYMBOL_DOWN_ARROWHEAD, font=fontNormalButtons, 
              pad=((0,6),(6,6)), button_color=('#3d4043', '#8dc7f6')),
@@ -994,14 +987,12 @@ if __name__ == '__main__':
         [sg.Column(layout2Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
     ]
 
-
     layout2Total = [
-        [sg.Column(layout2TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
-        [sg.VP(background_color='#b9b9b9')], 
-            [sg.P(background_color='#b9b9b9'), 
-                sg.Column(layout2Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((2,2),(0,0))),
-                sg.Column(layout2Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,2),(0,0))), 
-            sg.P(background_color='#b9b9b9')],
+        [sg.Column(layout2TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,5)))],
+            [sg.Column(layout2Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,0),(0,0))),
+            sg.Column(layout2Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,0),(0,0))), 
+            sg.P(background_color='#b9b9b9')
+            ],
         [sg.VP(background_color='#b9b9b9')]
     ]
 
@@ -1403,6 +1394,10 @@ if __name__ == '__main__':
         if event=='-SAVE-1-':
             savePath = values['-SAVE-1-']
             saveAsFile(window['-LAYOUT-1-'], savePath)
+        
+        if event=='-SAVE-2-':
+            savePath = values['-SAVE-2-']
+            saveAsFile(window['-LAYOUT-2-'], savePath)
 
         # Change mode button
         if event=='-CHANGE-MODE-1-':
@@ -1416,8 +1411,14 @@ if __name__ == '__main__':
                 changeModeStatus=True
 
 
-        # LAYOUT 2 --- BUDGET SIMULATION
+        # LAYOUT 2 --- NAME YOUR PRICE
         if event=='--CALCULATE-':
+
+            # Checks if inputs are within bounds -> do nothing if fails
+            passedCheck = inputChecker2(window, values)
+            if not passedCheck:
+                continue
+
             # Prevent double graphing
             delete_prev_graph(curr_fig)
             
@@ -1430,22 +1431,16 @@ if __name__ == '__main__':
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
-            # Checks if inputs are within bounds -> do nothing if fails
-            passedCheck = inputChecker2(window, values)
-            if not passedCheck:
-                continue
-
-
             newTable = nameYourPrice(userInputs)
 
             # Only able to save when there is graph on screen
-            # window['-SAVE-AS-1-'].update(disabled=False)
+            window['-SAVE-AS-2-'].update(disabled=False)
 
             # Draw the graphs created
             curr_fig = draw_figure(window['canvas2'].TKCanvas, newTable)
 
 
-
+        # "Drop down" menu for Layout change buttons
         if event=='-CHANGE-MODE-2-':
             if changeModeStatus:
                 window['-BUDGET-SIM-'].update(visible=False)
@@ -1464,7 +1459,6 @@ if __name__ == '__main__':
             delete_prev_graph(curr_fig)
             curr_fig = draw_figure(window['canvas2'].TKCanvas, create_empty_table())
 
-
         if event=='-BUDGET-SIM-':
             window['-LAYOUT-1-'].update(visible=True)
             window['-LAYOUT-2-'].update(visible=False)
@@ -1472,8 +1466,5 @@ if __name__ == '__main__':
             delete_prev_graph(curr_fig)
             curr_fig = draw_figure(window['canvas1'].TKCanvas, create_empty_graph())
             print("got here")
-
-        
-
 
     window.close()
