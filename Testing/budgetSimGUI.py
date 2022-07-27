@@ -2,10 +2,10 @@
 from calendar import c
 from csv import excel
 from queue import Empty
-from re import L
+from re import L, T
 from sqlite3 import Row
 from this import s
-from turtle import color, update
+from turtle import color, heading, update
 from webbrowser import BackgroundBrowser
 import matplotlib.pyplot as plt
 import matplotlib
@@ -545,22 +545,22 @@ def create_empty_graph():
     fig.set_figwidth(11)
     return plt.gcf()
 
-def create_empty_table():
-    fig, axes = plt.subplots()
-    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+# def create_empty_table():
+#     fig, axes = plt.subplots()
+#     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
 
-    # background color
-    axes.set_facecolor('#fffeea')
+#     # background color
+#     axes.set_facecolor('#fffeea')
 
-    # hide axes
-    fig.patch.set_visible(False)
-    axes.axis('off')
-    axes.axis('tight')
+#     # hide axes
+#     fig.patch.set_visible(False)
+#     axes.axis('off')
+#     axes.axis('tight')
 
-    # Defined size
-    fig.set_figheight(5.5)
-    fig.set_figwidth(11.38)
-    return plt.gcf()
+#     # Defined size
+#     fig.set_figheight(5.5)
+#     fig.set_figwidth(11.55)
+#     return plt.gcf()
 
 def delete_prev_graph(curr_fig):
     curr_fig.get_tk_widget().forget()
@@ -688,9 +688,7 @@ def nameYourPrice(inputs):
 
     # --------------------------------------------------- #
 
-    # Table for GUI
-    fig, axes = plt.subplots()
-    
+    # Table for GUI    
     data = []
     emptyList = [0]*(userContractTerm+userDeployYears-1)
     for i in range(userDeployYears+2):
@@ -733,50 +731,25 @@ def nameYourPrice(inputs):
         data[-2][i] = hlAnnualDeploy[i]
         data[-1][i] = hlAnnualCP[i]
 
-
-    columns = np.arange(2023, 2023+userContractTerm+userDeployYears-1, 1)
-    
-    rows = []
-    for i in range(userDeployYears):
-        tempRowTitle = 'Deployment '+ str(i+1) + ':'
-        rows.append(tempRowTitle)
-    rows.extend(['Total Deployed', 'Contract Price'])
-
-
-    # hide axes
-    fig.patch.set_visible(False)
-
-
-    # tableColor= [['#fffeea']*userContractTerm, 
-    #               ['#fffeea']*userContractTerm, 
-    #               ['#fffeea']*userContractTerm, 
-    #               ['#fffeea']*userContractTerm, 
-    #             ]
+    dataTransformed = []
+    for i in range(len(data)):
+        if i<userDeployYears:
+            tempRow = []
+            tempRowTitle = 'Deployment '+ str(i+1) + ':'
+            tempRow.append(tempRowTitle)
+            dataTransformed.append(tempRow)
+        elif i==userDeployYears:
+            dataTransformed.append(['Total Deployed'])
+        else:
+            dataTransformed.append(['Contract Price'])
+        for j in range(len(data[0])):
+            if i==(len(data)-1):
+                dataTransformed[i].append('$'+str(f"{data[i][j]:,}"))
+            else:
+                dataTransformed[i].append(str(f"{data[i][j]:,}"))
 
 
-    myTable = axes.table(cellText=data, rowLabels=rows, colLabels=columns,
-               cellLoc='center', bbox=(0,0,1,1)) # cellColours=tableColor
-
-    axes.axis('tight')
-    axes.axis('off')
-
-    myTable.auto_set_font_size(False)
-    myTable.set_fontsize(12)
-    myTable.scale(1,2)
-
-
-    # cellDict=myTable.get_celld()
-    # for i in range(len(rows)+1):
-    #     for j in range(len(columns)):
-    #         cellDict[(i,j)].set_width(0.5)
-
-    fig.tight_layout()
-
-    # Plot configuration
-    fig.set_figheight(5.5)
-    fig.set_figwidth(11.38)
-
-    return plt.gcf()
+    return dataTransformed, hlDeployNum
         
 
 if __name__ == '__main__':
@@ -789,6 +762,8 @@ if __name__ == '__main__':
     # #fdbd1c  -->  Highland yellow
     # #8dc7f6  -->  Light Blue
     # #409de7  -->  Dark Blue
+    # #ebead6  -->  Table Background Color
+    # #dcdbc7  -->  Table Alternating Background Color
 
     # Background Colors and Theme
     sg.theme_background_color(color = '#b9b9b9')
@@ -815,9 +790,13 @@ if __name__ == '__main__':
     # Highland Font 1 = "UniversalSans-500"
     # Highland Font 2 = "UniversalSans-680"
     # Highland Font 3 = "UniversalSans-775"
+
     fontNormalButtons = ("UniversalSans-775", 16)
     fontNormalInputs = ("UniversalSans-775", 16)
     fontNormalInputs2 = ("UniversalSans-680", 13)
+    fontDeployOutput = ("UniversalSans-775", 20)
+    fontTableInputs = ("UniversalSans-680", 16)
+    fontTableHeader = ("UniversalSans-680", 20)
     fontBigHeader = ("UniversalSans-775", 34)
     fontHeader = ("UniversalSans-775", 24)
 
@@ -942,6 +921,14 @@ if __name__ == '__main__':
         ]
     ]
 
+    layout2Col1Bot2Row = [
+        [sg.P(background_color='#65b397'), sg.T('Max Total Deployment', font=fontDeployOutput, background_color='#65b397', text_color='#ffffff'), 
+            sg.I(default_text='0', key='--MAX-DEPLOY-', font=fontDeployOutput, background_color='#65b397', text_color='#ffffff', 
+                 do_not_clear=True, size=(3, 1), pad=((0,6),(10,10)), justification='center')
+        ]
+    ]
+    
+
     layout2Col1 = [
         [sg.Column(layout2Col1TopRow, expand_x=True, background_color='#409de7', pad=((5,5),(5,32)))],
         [sg.P(), sg.T('Years to Deploy (Y)', font=fontNormalInputs), 
@@ -957,12 +944,13 @@ if __name__ == '__main__':
         [sg.P(), sg.T('Grant Per Bus ($)', font=fontNormalInputs), 
             sg.I(default_text=f"{int(savedInputs2[5]):,}", key='--GRANTS-', font=fontNormalInputs2, do_not_clear=True, size=(10, 1))],
         [sg.VP()],
+        [sg.Column(layout2Col1Bot2Row, expand_x=True, background_color='#65b397', pad=((4,4),(0,4)))],
         [sg.Column(layout2Col1BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))]
     ]
 
     layout2Col2TopRow = [
         [sg.P(background_color='#8dc7f6'), 
-        sg.T('Deployment Table', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6'), 
+        sg.T('Deployment Table', font=fontHeader, pad=((0,0),(16,16)), background_color='#8dc7f6', size=58, justification='center'), 
         sg.P(background_color='#8dc7f6')]
     ]
 
@@ -979,18 +967,43 @@ if __name__ == '__main__':
         ]
     ]
 
+    # Starting Table Creation 
+    headingStartYear = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=10, nrows=8)
+    headingList = ['Year']
+    for i in range(int(headingStartYear.iat[6,0]+headingStartYear.iat[7,0])):
+        headingList.append(str(int(headingStartYear.iat[0,0]+i+1)))
+    valuesList = [['Deployment 1:','0','0','0','0','0'],
+                  ['Deployment 2:','0','0','0','0','0'],
+                  ['Deployment 3:','0','0','0','0','0'],
+                  ['Total Deployed','0','0','0','0','0'],
+                  ['Contract Price','-','-','-','-','-']
+                  ]
+    colWidthsList = [13]
+    for i in range(int(headingStartYear.iat[6,0]+headingStartYear.iat[7,0])-1):
+        colWidthsList.append(10)
+
     layout2Col2 = [
-        [sg.Column(layout2Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,0)))],
+        [sg.Column(layout2Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,28)))],
+        [sg.Table(values=valuesList,
+                  headings=headingList,
+                  key='--TABLE-', expand_x=True, expand_y=True,
+                  auto_size_columns=False,
+                  row_height=42, col_widths=colWidthsList,
+                  justification='c', font=fontTableInputs, 
+                  header_font=fontTableHeader, header_border_width=2,
+                  num_rows=11, vertical_scroll_only=False,
+                  sbar_width=16, sbar_arrow_width=16,
+                  background_color='#ebead6', text_color='#000000',
+                  alternating_row_color='#dcdbc7', 
+                  pad=((10,10),(0,0)))],
         [sg.VP()],
-        [sg.Canvas(key='canvas2')],
-        [sg.VP()],
-        [sg.Column(layout2Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(0,0)))],
+        [sg.Column(layout2Col2BotRow, expand_x=True, background_color='#338165', pad=((0,0),(16,0)))],
     ]
 
     layout2Total = [
         [sg.Column(layout2TopRow, expand_x=True, background_color='#338165', pad=((0,0),(0,5)))],
             [sg.Column(layout2Col1, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,0),(0,0))),
-            sg.Column(layout2Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,0),(0,0))), 
+            sg.Column(layout2Col2, expand_y=True, expand_x=True, background_color='#fffeea', pad=((5,5),(0,0))), 
             sg.P(background_color='#b9b9b9')
             ],
         [sg.VP(background_color='#b9b9b9')]
@@ -999,7 +1012,7 @@ if __name__ == '__main__':
     # put everything in a col so it can be saved
     layout = [
         [sg.Column(layout1Total, key='-LAYOUT-1-', pad=((0,0),(0,0))), 
-         sg.Column(layout2Total, expand_x=True, expand_y=True, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)
+         sg.Column(layout2Total, key='-LAYOUT-2-', pad=((0,0),(0,0)), visible=False)
         ],
     ]
 
@@ -1418,9 +1431,6 @@ if __name__ == '__main__':
             passedCheck = inputChecker2(window, values)
             if not passedCheck:
                 continue
-
-            # Prevent double graphing
-            delete_prev_graph(curr_fig)
             
             # Grab user inputs
             userInputs = gatherUserInput2(values)
@@ -1431,14 +1441,15 @@ if __name__ == '__main__':
                     inputFile.write(str(input)) 
                     inputFile.write(' ')
 
-            newTable = nameYourPrice(userInputs)
+            # Updated data for table
+            newTable, maxDeploy = nameYourPrice(userInputs)
 
             # Only able to save when there is graph on screen
             window['-SAVE-AS-2-'].update(disabled=False)
 
-            # Draw the graphs created
-            curr_fig = draw_figure(window['canvas2'].TKCanvas, newTable)
-
+            # Update Table
+            window['--TABLE-'].update(values=newTable)
+            window['--MAX-DEPLOY-'].update(maxDeploy)
 
         # "Drop down" menu for Layout change buttons
         if event=='-CHANGE-MODE-2-':
@@ -1456,8 +1467,8 @@ if __name__ == '__main__':
             window['-LAYOUT-2-'].update(visible=True)
             window['-LAYOUT-1-'].update(visible=False)
 
-            delete_prev_graph(curr_fig)
-            curr_fig = draw_figure(window['canvas2'].TKCanvas, create_empty_table())
+            # delete_prev_graph(curr_fig)
+            # curr_fig = draw_figure(window['canvas2'].TKCanvas, create_empty_table())
 
         if event=='-BUDGET-SIM-':
             window['-LAYOUT-1-'].update(visible=True)
