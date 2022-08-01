@@ -16,9 +16,9 @@ import math
 
 # Font import
 import pyglet
-pyglet.font.add_file(r".\Fonts\font1.ttf")
-pyglet.font.add_file(r".\Fonts\font2.ttf")
-pyglet.font.add_file(r".\Fonts\font3.ttf")
+pyglet.font.add_file(r".\Settings\Fonts\font1.ttf")
+pyglet.font.add_file(r".\Settings\Fonts\font2.ttf")
+pyglet.font.add_file(r".\Settings\Fonts\font3.ttf")
 
 # GUI 
 import PySimpleGUI as sg
