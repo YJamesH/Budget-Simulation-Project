@@ -9,25 +9,25 @@ Move the 'Deploy' folder as one
 ## Running
 Click the .exe file and input away!
 
-##### Buttons and functions
-  **Budget Simulation**
-      **Save Input**
+## Buttons and functions
+  **Budget Simulation** <br/>
+      **Save Input** <br/>
         - Current inputs will be saved. Resetting inputs will bring you back to these inputs <br/>
-      **Reset Inputs**
+      **Reset Inputs** <br/>
         - Current inputs will be erased and the previous saved inputs will be input <br/>
-      **Plot!**
-        - Click this to generate graphs to display how the highland contract will change current budget
-      **Save Screenshot**
-        - Click this to pull up file explorer to save a screenshot of the screen. (jpg, png, etc.)
-      **Change Mode**
-        - Click this to display buttons that will change the mode 
+      **Plot!** <br/>
+        - Click this to generate graphs to display how the highland contract will change current budget <br/>
+      **Save Screenshot** <br/>
+        - Click this to pull up file explorer to save a screenshot of the screen. (jpg, png, etc.) <br/>
+      **Change Mode** <br/>
+        - Click this to display buttons that will change the mode  <br/><br/>
       
-  **Name Your Price**
-      **Calculate**
-        - Click this to populate the table with values and generate an estimated amount of buses able to be afforded
-      **Save Screenshot**
-        - Click this to pull up file explorer to save a screenshot of the screen. (jpg, png, etc.)
-      **Change Mode**
-        - Click this to display buttons that will change the mode 
+  **Name Your Price** <br/>
+      **Calculate** <br/>
+        - Click this to populate the table with values and generate an estimated amount of buses able to be afforded <br/>
+      **Save Screenshot** <br/>
+        - Click this to pull up file explorer to save a screenshot of the screen. (jpg, png, etc.) <br/>
+      **Change Mode** <br/>
+        - Click this to display buttons that will change the mode <br/>
 
 
