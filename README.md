@@ -12,9 +12,9 @@ Click the .exe file and input away!
 ##### Buttons and functions
   **Budget Simulation**
       **Save Input**
-        - Current inputs will be saved. Resetting inputs will bring you back to these inputs
+        - Current inputs will be saved. Resetting inputs will bring you back to these inputs <br/>
       **Reset Inputs**
-        - Current inputs will be erased and the previous saved inputs will be input
+        - Current inputs will be erased and the previous saved inputs will be input <br/>
       **Plot!**
         - Click this to generate graphs to display how the highland contract will change current budget
       **Save Screenshot**
