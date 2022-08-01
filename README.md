@@ -11,7 +11,7 @@ Click the .exe file and input away!
 
 ##### Buttons and functions
   **Budget Simulation**
-      **Save Inputs**
+      **Save Input**
         - Current inputs will be saved. Resetting inputs will bring you back to these inputs
       
       **Reset Inputs**
@@ -27,7 +27,7 @@ Click the .exe file and input away!
         - Click this to display buttons that will change the mode 
       
   **Name Your Price**
-      **Calculate!**
+      **Calculate**
         - Click this to populate the table with values and generate an estimated amount of buses able to be afforded
       
       **Save Screenshot**
