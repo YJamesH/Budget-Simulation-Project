@@ -120,9 +120,10 @@ def create_budget_graphs(inputs):
             contractYearPrice[simAddYear] = int(contractYearPrice[simAddYear] + CYPPrice)
             CYPPrice = CYPPrice * (1+contractEsc)
 
-    # --------------------------------------------------- #
 
+    # --------------------------------------------------- #
     # # Statistics summary
+
     # print("\n Summary ")
     # print("Deployment Year              ", deploymentYear)
     # print("Contract Term                ", deploymentYear)
@@ -167,7 +168,6 @@ def create_budget_graphs(inputs):
     for i in range(dieselTerm):
         purchaseTCO.append(pmtDieselPrice)
 
-
     # Maintenance and Repair
     for i in range(contractTerm):
         # M&R differs in different half lifes
@@ -176,11 +176,9 @@ def create_budget_graphs(inputs):
         else:
             mrTCO.append(int(mrTCO[i-1]*(1+MREsc2)))
 
-
     # Fuel
     for i in range(contractTerm):
         fuelTCO.append(int((annualMiles/weightedMPG)*fuelPriceGal*pow((1+costEsc),i)))
-
 
     # Overhead
     for i in range(contractTerm):
@@ -191,6 +189,7 @@ def create_budget_graphs(inputs):
     # print("TCO", mrTCO)
     # print("TCO", fuelTCO)
     # print("TCO", overheadTCO, "\n")
+
 
     # --------------------------------------------------- #
     # Diesel Costs avoided  - Break down
@@ -209,7 +208,6 @@ def create_budget_graphs(inputs):
                 purchaseDCA[simDepYear+simAddYear] = purchaseDCA[simDepYear+simAddYear] + simCost
     purchaseDCA.insert(0,0)
 
-
     # M&R costs avoided
     for simDepYear in range(contractTerm):
         currMRCost = MRCost * pow(1+costEsc, simDepYear)
@@ -223,7 +221,6 @@ def create_budget_graphs(inputs):
             else:
                 yearlyMR = yearlyMR * (1+MREsc2)
     mrDCA.insert(0,0)
-    
 
     # Fuel costs avoided
     for simDepYear in range(contractTerm):
@@ -236,7 +233,6 @@ def create_budget_graphs(inputs):
             yearlyFuel = yearlyFuel * (1+costEsc)
     fuelDCA.insert(0,0)
 
-
     # Overhead costs avoided
     for simDepYear in range(contractTerm):
         overheadDCA.append(int(overheadAllocation*(fuelDCA[simDepYear] + mrDCA[simDepYear])))
@@ -247,6 +243,7 @@ def create_budget_graphs(inputs):
     # print("DCA", mrDCA)
     # print("DCA", fuelDCA)
     # print("DCA", overheadDCA, "\n")
+
 
     # --------------------------------------------------- #
     # Relative Budget Neutrality
@@ -279,13 +276,12 @@ def create_budget_graphs(inputs):
         tempSub = budgetStaQuo[simDepYear]-budgetDiffRBN[simDepYear]
         finalRBudget.append(tempSub)
 
-
-
     # # Prints
     # print("Total DCA", totalDCA, "\n")
     # print("Budget Status Quo", budgetStaQuo)
     # print("Final Relative Budget", finalRBudget)
     # print("Budget Diff RBN", budgetDiffRBN, "\n")
+
 
     # --------------------------------------------------- #
     # bottom-up budget analysis
@@ -323,12 +319,12 @@ def create_budget_graphs(inputs):
     for simDepYear in range(1,contractTerm+1):
         buTotalPrice[simDepYear] = buTotalPrice[simDepYear] + contractYearPrice[simDepYear-1]
 
-
     # # Prints
     # print("Bottom-up Operating Status Quo", buOperatingSQ)
     # print("Bottom-up Operating Costs", buOperatingCosts)
     # print("Bottom-up Personnel Costs", buPersonnelCosts)
     # print("Bottom-up Total", buTotalPrice, "\n")
+
 
     # --------------------------------------------------- #
     # Carbon Reduction
@@ -354,6 +350,7 @@ def create_budget_graphs(inputs):
 
     # # Prints
     # print("Cumulative Carbon Reduced", cumulCarbonReduced, "\n") 
+
 
     # --------------------------------------------------- #
     # Graphs and Plots
@@ -394,7 +391,9 @@ def create_budget_graphs(inputs):
     formatMillions = FuncFormatter(millions)
     formatThousands = FuncFormatter(thousands)
 
-
+    # --------------------------------------------------- #
+    # GRAPHS
+    
     # Figure 1 - Budget Neutral Transition
     plt.sca(axes[0,0])
     plt.plot(yearsWDep, budgetStaQuo[0:contractTerm+1], 'r', label='Budget SQ')
@@ -544,23 +543,6 @@ def create_empty_graph():
     fig.set_figheight(5.07)
     fig.set_figwidth(11)
     return plt.gcf()
-
-# def create_empty_table():
-#     fig, axes = plt.subplots()
-#     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
-
-#     # background color
-#     axes.set_facecolor('#fffeea')
-
-#     # hide axes
-#     fig.patch.set_visible(False)
-#     axes.axis('off')
-#     axes.axis('tight')
-
-#     # Defined size
-#     fig.set_figheight(5.5)
-#     fig.set_figwidth(11.55)
-#     return plt.gcf()
 
 def delete_prev_graph(curr_fig):
     curr_fig.get_tk_widget().forget()
@@ -748,7 +730,6 @@ def nameYourPrice(inputs):
             else:
                 dataTransformed[i].append(str(f"{data[i][j]:,}"))
 
-
     return dataTransformed, hlDeployNum
         
 
@@ -773,7 +754,6 @@ if __name__ == '__main__':
     sg.theme_text_color(color='#3d4043')    
     sg.theme_text_element_background_color(color='#fffeea')
 
-
     # Get last inputted -- file is formatted in same order as displayed inputs
     savedInputs1 = []
     with open(r'./Settings/previousInputs1.txt', 'r') as inputFile:
@@ -785,6 +765,7 @@ if __name__ == '__main__':
         for line in inputFile:
             for input in line.split():
                 savedInputs2.append(input)
+
     # --------------------------------------------------- #
     # Font types
     # Highland Font 1 = "UniversalSans-500"
@@ -800,7 +781,7 @@ if __name__ == '__main__':
     fontBigHeader = ("UniversalSans-775", 34)
     fontHeader = ("UniversalSans-775", 24)
 
-
+    # --------------------------------------------------- #
     # LAYOUT 1 --- BUDGET SIMULATION
     layout1Col1TopRow = [
         [sg.P(background_color='#409de7'), 
@@ -897,7 +878,7 @@ if __name__ == '__main__':
         [sg.VP(background_color='#b9b9b9')]
     ]
 
-
+    # --------------------------------------------------- #
     # LAYOUT 2 --- NAME YOUR PRICE 
     img_logo_2 = sg.Image(filename='./Settings/Highland Logo.png', subsample=3, pad=((4,4),(4,4)))
     
@@ -968,9 +949,9 @@ if __name__ == '__main__':
     ]
 
     # Starting Table Creation 
-    headingStartYear = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=10, nrows=8)
+    headingStartYear = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=10, nrows=13)
     headingList = ['Year']
-    for i in range(int(headingStartYear.iat[6,0]+headingStartYear.iat[7,0])):
+    for i in range(int(headingStartYear.iat[11,0]+headingStartYear.iat[12,0])):
         headingList.append(str(int(headingStartYear.iat[0,0]+i+1)))
     valuesList = [['Deployment 1:','0','0','0','0','0'],
                   ['Deployment 2:','0','0','0','0','0'],
@@ -981,7 +962,7 @@ if __name__ == '__main__':
     colWidthsList = [13]
     for i in range(int(headingStartYear.iat[6,0]+headingStartYear.iat[7,0])-1):
         colWidthsList.append(10)
-
+    
     layout2Col2 = [
         [sg.Column(layout2Col2TopRow, expand_x=True, background_color='#8dc7f6', pad=((5,5),(5,28)))],
         [sg.Table(values=valuesList,
@@ -1017,8 +998,8 @@ if __name__ == '__main__':
     ]
 
     # --------------------------------------------------- #
-
     # PySimpleGUI GUI Creation
+    
     def draw_figure(canvas, figure):
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
@@ -1028,12 +1009,8 @@ if __name__ == '__main__':
     window = sg.Window('Budget Simulation', layout, finalize=True, size=(1550, 800),
                         margins=(0,0), grab_anywhere=True, relative_location=(300,60))
 
-    # Set minimum window resizable size
-    # window.TKroot.minsize(1250, 650)
-
     # Start with Empty Graph
     curr_fig = draw_figure(window['canvas1'].TKCanvas, create_empty_graph())
-
 
     # --------------------------------------------------- #
     # Function makes sure all Inputs are within specified bounds
@@ -1213,7 +1190,7 @@ if __name__ == '__main__':
         someError = False
         
         # Grab bounds for Deploy Year and Contract Term
-        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=15, nrows=3)
+        excelBounds = pd.read_excel(r'./Settings/Budget Simulation - Admin.xlsx', usecols= "E", header=20, nrows=3)
         CTLowerBound = excelBounds.iat[0,0]
         CTUpperBound = excelBounds.iat[1,0]
         DYUpperBound = excelBounds.iat[2,0]
@@ -1476,6 +1453,5 @@ if __name__ == '__main__':
 
             delete_prev_graph(curr_fig)
             curr_fig = draw_figure(window['canvas1'].TKCanvas, create_empty_graph())
-            print("got here")
 
     window.close()
