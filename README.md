@@ -26,8 +26,13 @@ Move the 'Highland Fleets Budget Simulation' folder as one
 No need to access any files in the 'Settings' folder!
 
 ## Running
-Click the .exe file and input away!
+Download the .zip folder
 
+Unzip to desired location
+
+Open the budgetSimGUI application and input away!
+
+-  'Budget-Simulation-Project-main' -> 'Highland Fleets Budget Simulation' -> budgetSimGUI.exe
 ## Buttons and functions
    **Budget Simulation** <br/>
 -    **Save Inputs** <br/>
