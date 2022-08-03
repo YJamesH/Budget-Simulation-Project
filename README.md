@@ -6,12 +6,12 @@ I estimate what a Highland Contract can do to your current budget!
 After entering inputs...
 
 **Budget Simulation**
--  Graph 1 (top left) will display a Budget Neutral Transition:
+-  Graph 1 (top left) displays a Budget Neutral Transition:
     -   Current budget vs. Your budget with the Highland Contract. Savings are also shown!
--  Graph 2 (top right) will display a Bottom Up Analysis of your budget:
+-  Graph 2 (top right) displays a Bottom Up Analysis of your budget:
     -   Current budget vs. Operating + Personnel + Capital Costs + Highland Contract
--  Graph 3 (bottom left) will display a line graph for CO2 reduction by switching to EVs
--  Graph 4 (bottom right) will display a short term Bottom Up Analysis:
+-  Graph 3 (bottom left) displays a line graph for CO2 reduction by switching to EVs
+-  Graph 4 (bottom right) displays a short term Bottom Up Analysis:
     -   Graph 2, but with a 5 year time span.
     
 **Name Your Price**
