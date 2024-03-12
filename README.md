@@ -1,7 +1,11 @@
-# Budget Simulation and Name Your Price Tool
+# Budget Simulation App and Name-Your-Price Tool
 
 ## What I Do
 I estimate what a Highland Contract can do to your current budget!
+
+This project revolves around an app designed to illustrate the long-term cost-saving potential of Highland Contracts. These contracts, often spanning 15 to 20 years, are projected to generate savings of 10% or more compared to current expenditures, with savings typically increasing as the contract progresses towards its end. The app's primary goal is to provide users with visual graphs of estimated savings and benefits, along with and a more in-depth look into the contract breakdown.
+
+This app was created under the West Fleet Team at Highland Electric Fleets.
 
 After entering inputs...
 
@@ -19,20 +23,19 @@ After entering inputs...
 -  A maximum total deployment number is also calculated to displayan estimated number of electric buses able to be afforded.
 
 ## Important things to note:
-Do **NOT** move file and folder locations relative to each other.
+Don't move file and folder locations relative to each other.
 
 Move the 'Highland Fleets Budget Simulation' folder as one
 
 No need to access any files in the 'Settings' folder!
 
 ## Running
-Download the .zip folder
+Clone the repository
 
-Unzip to desired location
+Navigate into 'Highland Fleets Budget Simulation' folder
 
-Open the budgetSimGUI application and input away!
+Run budgetSimGUI.exe and input away!
 
--  'Budget-Simulation-Project-main' -> 'Highland Fleets Budget Simulation' -> budgetSimGUI.exe
 ## Buttons and functions
    **Budget Simulation** <br/>
 -    **Save Inputs** <br/>
